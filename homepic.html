@@ -1,0 +1,1079 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Homepic – ניהול נכסים</title>
+<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Heebo,sans-serif;background:#F8FAFC;color:#0F172A;direction:rtl}
+.T{width:100%;border-collapse:collapse;font-size:13px}
+.T th{padding:9px 12px;text-align:right;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:#94A3B8;border-bottom:1px solid #E2E8F0;background:#F8FAFC}
+.T td{padding:10px 12px;border-bottom:1px solid #F1F5F9;vertical-align:middle}
+.T tr:hover td{background:#FAFBFF}
+.btn{padding:6px 14px;border-radius:8px;border:none;cursor:pointer;font-size:13px;font-family:Heebo,sans-serif;font-weight:600;transition:opacity .15s}
+.btn:hover{opacity:.82}
+.blue{background:#1D6FA4;color:#fff}.green{background:#10B981;color:#fff}
+.red{background:#FEE2E2;color:#991B1B;border:1px solid #FECACA}
+.gray{background:#F1F5F9;color:#475569;border:1px solid #E2E8F0}
+.sm{padding:3px 9px;font-size:11px;border-radius:6px;border:1px solid #E2E8F0;cursor:pointer;font-family:Heebo,sans-serif;font-weight:600;background:#fff}
+.nav-btn{width:100%;display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;border:none;cursor:pointer;font-size:14px;font-family:Heebo,sans-serif;text-align:right;background:transparent;color:#94A3B8;font-weight:400;margin-bottom:2px;transition:all .15s}
+.nav-btn:hover{background:rgba(255,255,255,.08);color:#fff}
+.nav-btn.on{background:#2388CC;color:#fff;font-weight:700}
+.stat{background:#fff;border-radius:14px;padding:16px 20px;flex:1;min-width:110px;box-shadow:0 1px 4px rgba(0,0,0,.07)}
+.card{background:#fff;border-radius:14px;padding:20px;box-shadow:0 1px 4px rgba(0,0,0,.08)}
+.fg{display:flex;flex-direction:column;gap:3px;flex:1;min-width:100px}
+.fg label{font-size:10px;color:#94A3B8;font-weight:700;text-transform:uppercase;letter-spacing:.3px}
+.fg input,.fg select,.fg textarea{font-size:13px;padding:7px 10px;border-radius:8px;border:1px solid #E2E8F0;background:#fff;color:#0F172A;font-family:Heebo,sans-serif;direction:rtl;width:100%;outline:none}
+.fg input:focus,.fg select:focus,.fg textarea:focus{border-color:#1D6FA4;box-shadow:0 0 0 2px rgba(29,111,164,.15)}
+.sec{background:#F8FAFC;border-radius:10px;padding:12px 14px;margin-bottom:12px}
+.sec-lbl{font-size:10px;color:#94A3B8;font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px}
+/* Modal */
+#overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:999;display:none;align-items:center;justify-content:center}
+#overlay.show{display:flex}
+#mbox{background:#fff;border-radius:16px;padding:26px;width:92%;max-width:640px;max-height:90vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.25)}
+.badge{display:inline-block;padding:2px 10px;border-radius:6px;font-size:12px;font-weight:600}
+.bg{background:#DCFCE7;color:#166534}.by{background:#FEF9C3;color:#854D0E}
+.bb{background:#DBEAFE;color:#1E40AF}.br{background:#FEE2E2;color:#991B1B}
+</style>
+</head>
+<body>
+<div style="display:flex;height:100vh;overflow:hidden">
+
+<!-- SIDEBAR -->
+<div style="width:210px;background:#0D1B2A;display:flex;flex-direction:column;flex-shrink:0">
+  <div style="padding:22px 18px 16px;border-bottom:1px solid #243B55">
+    <div style="font-size:20px;font-weight:900;color:#fff;letter-spacing:-.5px">Homepic</div>
+    <div style="font-size:9px;color:#00C4CC;font-weight:700;letter-spacing:1.2px;margin-top:2px">PROPERTY MANAGEMENT</div>
+  </div>
+  <nav style="flex:1;padding:10px 8px;overflow-y:auto" id="nav"></nav>
+  <div style="padding:14px 16px;border-top:1px solid #243B55">
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+      <div style="width:32px;height:32px;border-radius:50%;background:#2388CC;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:13px">ר</div>
+      <div><div style="font-size:12px;color:#fff;font-weight:600">רועי כהן</div><div style="font-size:10px;color:#64748B">Homepic</div></div>
+    </div>
+    <button onclick="exportData()" style="width:100%;background:#1D6FA4;color:#fff;border:none;border-radius:7px;padding:6px;font-size:11px;font-family:Heebo,sans-serif;font-weight:600;cursor:pointer;margin-bottom:4px">&#x2B07; גיבוי נתונים</button>
+    <label style="display:block;width:100%;background:#243B55;color:#94A3B8;border:none;border-radius:7px;padding:6px;font-size:11px;font-family:Heebo,sans-serif;font-weight:600;cursor:pointer;text-align:center;margin-bottom:4px">&#x2B06; ייבוא גיבוי<input type="file" accept=".json" onchange="importData(event)" style="display:none"></label>
+    <button class="btn red" onclick="resetAll()" style="width:100%;font-size:11px;padding:5px">↺ איפוס לדוגמה</button>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div style="flex:1;display:flex;flex-direction:column;overflow:hidden">
+  <div style="background:#fff;border-bottom:1px solid #E2E8F0;padding:0 24px;height:56px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0">
+    <div style="font-size:18px;font-weight:800" id="pg-title"></div>
+    <div style="display:flex;align-items:center;gap:8px">
+      <div id="sv-ind" style="background:#F0FDF4;color:#166534;border-radius:7px;padding:3px 10px;font-size:11px;font-weight:600;opacity:0;transition:opacity .3s">💾 נשמר</div>
+      <div style="background:#F1F5F9;border-radius:7px;padding:3px 12px;font-size:12px;color:#475569;font-weight:600" id="p-cnt"></div>
+    </div>
+  </div>
+  <div style="flex:1;overflow-y:auto;padding:22px 26px" id="main"></div>
+</div>
+
+<!-- MODAL -->
+<div id="overlay" onclick="closeM()">
+  <div id="mbox" onclick="event.stopPropagation()">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px">
+      <h2 style="font-size:16px;font-weight:700;margin:0" id="m-title"></h2>
+      <button onclick="closeM()" style="background:none;border:none;font-size:20px;cursor:pointer;color:#94A3B8;line-height:1">✕</button>
+    </div>
+    <div id="m-body"></div>
+  </div>
+</div>
+
+<script>
+// ─── SEED ─────────────────────────────────────────────────────────────────
+const SEED = {props:[{"address":"איינשטיין 73 ","city":"תל אביב","type":"דירה","status":"מושכר","rooms":3,"size":80,"floor":3,"rent":7700,"owner":"משפחת שוורצקוף","ownerPhone":"","tenant":"ירדן אנקונינה ","tenantPhone":"052-7391004","contractStart":"2026-07-15","contractEnd":"2027-07-14","deposit":15000,"depositPaid":true,"depositReturned":false,"id":1778593848562,"area":"","building":"רמת אביב","depositType":"צ'ק בנקאי","arnona":0,"vaad":0,"balconySize":0,"parking":false,"balcony":false,"notes":"חודש חוזה לשנה נוספת עם אופציה שכ׳׳ד התעדכן ל-7,700 באופציה מתעדכן ל-8000 שח ","unit":"","folder":"","elevator":false,"mamad":false},{"address":"לסקוב 16","city":"תל אביב","type":"דירה","status":"מושכר","rooms":3,"size":100,"floor":2,"rent":9900,"owner":"רונה ויהונתן הרמן ","ownerPhone":"","tenant":"3 שותפים ","tenantPhone":"","contractStart":"2026-06-10","contractEnd":"2026-07-09","deposit":9900,"depositPaid":true,"depositReturned":false,"id":1778593841403,"area":"מרכז תל אביב","building":"לב העיר ","depositType":"שיק ביטחון","arnona":0,"vaad":0,"balconySize":20,"parking":true,"balcony":true,"notes":"הדירה מושכרת ל-3 שותפים כל הזמן הם דואגים לשוכרים במידה ויש תחלופה (שכ׳׳ד משולם בהוראת קבע)","unit":"","folder":"","elevator":false,"mamad":false},{"address":"בן יהודה 256 ","city":"תל אביב","type":"דירה","status":"בטיפול","rooms":3,"size":62,"floor":1,"rent":7200,"owner":"יפה פורטר","ownerPhone":"","tenant":"נופר ","tenantPhone":"‪+972 50‑995‑4633‬","contractStart":"","contractEnd":"","deposit":14400,"depositPaid":false,"depositReturned":false,"id":1778593818511,"area":"צפון ישן (רמת אביב)","building":"","depositType":"צ'ק בנקאי","arnona":540,"vaad":180,"balconySize":4,"parking":false,"balcony":true,"notes":"הדירה מתפנה אחרי 10 שנים בתחילת אוגוסט מחכה לתשובה סופית מיפה ","unit":"","folder":"","elevator":false,"mamad":false},{"address":"עזריה מן האדומים 5 ","city":"תל אביב","type":"דירה","status":"מושכר","rooms":3,"size":65,"floor":1,"rent":7500,"owner":"רחלי אוחיון","ownerPhone":"","tenant":"עומר ערוסי","tenantPhone":"","contractStart":"2026-12-01","contractEnd":"2027-11-30","deposit":15000,"depositPaid":true,"depositReturned":false,"id":1778593794691,"area":"","building":"","depositType":"מזומן","arnona":0,"vaad":0,"balconySize":0,"parking":false,"balcony":false,"notes":"עומר ערוסי ושירה חידשו חוזה לשנה נוספת שכ׳׳ד 7500 באופציה עליה ל-8000 שח ","unit":"","folder":"","elevator":false,"mamad":false},{"address":"נורדאו 61","city":"תל אביב","type":"דירה","status":"בטיפול","rooms":2,"size":65,"floor":1,"rent":5800,"owner":"אשר ברק ","ownerPhone":"","tenant":"אסף גוסטמן ","tenantPhone":"","contractStart":"2025-06-01","contractEnd":"2026-05-31","deposit":11600,"depositPaid":true,"depositReturned":false,"id":1778593785820,"unit":"","folder":"","area":"","elevator":false,"parking":false,"balcony":false,"balconySize":0,"mamad":false,"depositType":"מזומן","arnona":0,"vaad":0,"notes":""},{"address":"ירמיהו 43 ","city":"תל אביב","type":"דירה","status":"מושכר","rooms":3,"size":65,"floor":1,"rent":8200,"owner":"אלנה גוטצייט","ownerPhone":"","tenant":"-אירה גכמן ","tenantPhone":"","contractStart":"","contractEnd":"","deposit":0,"depositPaid":false,"depositReturned":false,"id":1778593779756,"unit":"","folder":"ירמיהו 43","area":"","elevator":false,"parking":false,"balcony":false,"balconySize":0,"mamad":false,"depositType":"מזומן","arnona":0,"vaad":0,"notes":""},{"address":"ירמיהו 43","city":"תל אביב","type":"דירת גן","status":"מושכר","rooms":2,"size":50,"floor":0,"rent":8000,"owner":" סמואל מרדכי","ownerPhone":"","tenant":"דור מי טל ","tenantPhone":"","contractStart":"2025-12-09","contractEnd":"2026-12-08","deposit":0,"depositPaid":true,"depositReturned":false,"id":1778593774213,"area":"צפון ישן (רמת אביב)","building":"ירמיהו 43 ","depositType":"צ'ק בנקאי","arnona":0,"vaad":0,"balconySize":0,"parking":true,"balcony":true,"notes":"הדירה מושכרת עד דצמבר 26 ללא אופציה שכ׳׳ד 8000 שח יש חניה פרטית חצר גדולה נכס בניהוך שוטף ","unit":"","folder":"ירמיהו 43","elevator":false,"mamad":false},{"address":"דיזנגוף 279","city":"תל אביב","type":"דירה","status":"מושכר","rooms":2,"size":80,"floor":4,"rent":9000,"owner":"חיים","ownerPhone":"","tenant":"גיא ירקוני ","tenantPhone":"","contractStart":"2026-08-01","contractEnd":"2027-07-31","deposit":18000,"depositPaid":true,"depositReturned":false,"id":1778593764652,"area":"צפון ישן (רמת אביב)","building":"צפון ישן ","depositType":"ערבות בנקאית","arnona":900,"vaad":250,"balconySize":30,"parking":false,"balcony":true,"notes":"גיא חידש חוזה לשנה נסופת שכ׳׳ד 9,000 שח עם אופציה לשנה נוספת שכ׳׳ד 10,000 שח ","unit":"","folder":"","elevator":false,"mamad":false},{"address":"שץ 2 ","city":"תל אביב","type":"דירה","status":"פנוי","rooms":0,"size":0,"floor":0,"rent":0,"owner":"","ownerPhone":"","tenant":"-","tenantPhone":"","contractStart":"","contractEnd":"","deposit":0,"depositPaid":false,"depositReturned":false,"id":1778593744335,"unit":"","folder":"","area":"","elevator":false,"parking":false,"balcony":false,"balconySize":0,"mamad":false,"depositType":"מזומן","arnona":0,"vaad":0,"notes":""},{"address":"ירמיהו 27 ","city":"תל אביב","type":"דירה","status":"פנוי","rooms":0,"size":0,"floor":0,"rent":0,"owner":"","ownerPhone":"","tenant":"-","tenantPhone":"","contractStart":"","contractEnd":"","deposit":0,"depositPaid":false,"depositReturned":false,"id":1778593737231,"unit":"","folder":"","area":"","elevator":false,"parking":false,"balcony":false,"balconySize":0,"mamad":false,"depositType":"מזומן","arnona":0,"vaad":0,"notes":""},{"address":"בן יהודה 137 ","city":"תל אביב","type":"דירה","status":"פנוי","rooms":0,"size":0,"floor":0,"rent":0,"owner":"","ownerPhone":"","tenant":"-","tenantPhone":"","contractStart":"","contractEnd":"","deposit":0,"depositPaid":false,"depositReturned":false,"id":1778593719102,"unit":"","folder":"בן יהודה 137","area":"","elevator":false,"parking":false,"balcony":false,"balconySize":0,"mamad":false,"depositType":"מזומן","arnona":0,"vaad":0,"notes":""},{"id":1,"address":"בן יהודה 224 ","city":"תל אביב","rooms":2,"rent":6500,"tenant":"סלבה ","tenantPhone":"050-7412225","status":"בטיפול","type":"דירה","owner":"שושנה אוחיון","ownerPhone":"","contractStart":"2025-08-04","contractEnd":"2026-08-03","deposit":13000,"depositPaid":true,"depositReturned":false,"floor":4,"size":45,"unit":"","folder":"","area":"","elevator":false,"parking":false,"balcony":false,"balconySize":0,"mamad":false,"depositType":"מזומן","arnona":0,"vaad":0,"notes":""},{"id":2,"address":"ויצמן 13","city":"תל אביב","rooms":5,"rent":14000,"tenant":"עוז גולן","tenantPhone":"054-3332083","status":"מושכר","type":"דירה","owner":"מירב מדלן כהן ","ownerPhone":"","contractStart":"2025-07-15","contractEnd":"2026-07-14","deposit":42000,"depositPaid":true,"depositReturned":false,"floor":5,"size":124,"area":"","building":"","depositType":"מזומן","arnona":0,"vaad":0,"balconySize":14,"parking":true,"balcony":true,"notes":"","unit":"","folder":"","elevator":false,"mamad":false},{"id":3,"address":"אלקלעי 3","city":"תל אביב","rooms":2,"rent":6000,"tenant":"רעות אמזלג","tenantPhone":"","status":"מושכר","type":"דירה","owner":"שושנה אוחיון","ownerPhone":"","contractStart":"","contractEnd":"","deposit":12000,"depositPaid":true,"depositReturned":false,"floor":3,"size":65,"area":"אחר","building":" מתחם בזל","depositType":"צ'ק בנקאי","arnona":0,"vaad":0,"balconySize":10,"parking":false,"balcony":true,"notes":"חודש חוזה לשנה נסופת ","unit":"","folder":"","elevator":false,"mamad":false},{"id":4,"address":"יהושוע בן נון 31 ","city":"תל אביב","rooms":2.5,"rent":7800,"tenant":"הדס מנדלשטם מנור","tenantPhone":"","status":"מושכר","type":"דירה","owner":"שושנה אוחיון","ownerPhone":"0507775559","contractStart":"2026-05-01","contractEnd":"","deposit":7800,"depositPaid":true,"depositReturned":false,"floor":1,"size":65,"building":"","depositType":"צ'ק בנקאי","arnona":600,"parking":true,"balcony":false,"balconySize":0,"notes":"חודש חוזה לשנה נוספת שכ׳׳ד עודכן ל-7,800 לשנת 2026-2027 בנוסף משלמת על חניה בוורמייזה עוד 1300 ש׳׳ח ","unit":"","folder":"","area":"","elevator":false,"mamad":false,"vaad":0},{"id":5,"address":"נחום הנביא 13 א","city":"תל אביב","rooms":2,"rent":6500,"tenant":"שי צריקר","tenantPhone":"","status":"מושכר","type":"דירה","owner":"שושנה אוחיון","ownerPhone":"","contractStart":"","contractEnd":"","deposit":13000,"depositPaid":true,"depositReturned":false,"floor":1,"size":50,"area":"צפון ישן (רמת אביב)","building":"","depositType":"צ'ק בנקאי","arnona":0,"vaad":0,"balconySize":0,"parking":false,"balcony":false,"notes":"","unit":"","folder":"","elevator":false,"mamad":false},{"id":6,"address":"נחום הנביא 13 א דירה קטנה","city":"תל אביב","rooms":3,"rent":7200,"tenant":"יוסי גל","tenantPhone":"050-7778889","status":"מושכר","type":"דירה","owner":"מרקוס ה.","ownerPhone":"052-4445566","contractStart":"2024-09-01","contractEnd":"2025-08-31","deposit":14400,"depositPaid":true,"depositReturned":false,"floor":1,"size":72,"unit":"","folder":"","area":"","elevator":false,"parking":false,"balcony":false,"balconySize":0,"mamad":false,"depositType":"מזומן","arnona":0,"vaad":0,"notes":""},{"id":7,"address":"בן יהודה 137 ","city":"תל אביב","rooms":2,"rent":7000,"tenant":"-","tenantPhone":"","status":"מושכר","type":"דירה","owner":"בן כהן ","ownerPhone":"","contractStart":"2026-06-01","contractEnd":"2026-05-31","deposit":10000,"depositPaid":true,"depositReturned":false,"floor":3,"size":65,"area":"","building":"","depositType":"מזומן","arnona":0,"vaad":0,"balconySize":10,"parking":false,"balcony":true,"notes":"","unit":"","folder":"בן יהודה 137","elevator":false,"mamad":false},{"id":8,"address":"בן יהודה 137","city":"תל אביב","rooms":2,"rent":8800,"tenant":"לירון מזרחי","tenantPhone":"052-1239876","status":"מושכר","type":"דירה","owner":"משפחת כהן","ownerPhone":"054-9876543","contractStart":"2025-03-01","contractEnd":"2026-02-28","deposit":17600,"depositPaid":true,"depositReturned":false,"floor":5,"size":62,"unit":"","folder":"בן יהודה 137","area":"","elevator":false,"parking":false,"balcony":false,"balconySize":0,"mamad":false,"depositType":"מזומן","arnona":0,"vaad":0,"notes":""},{"id":9,"address":"בן יהודה 137","city":"תל אביב","rooms":3,"rent":8200,"tenant":"-","tenantPhone":"","status":"בטיפול","type":"דירה","owner":"שפירא מ.","ownerPhone":"050-9998887","contractStart":"","contractEnd":"","deposit":0,"depositPaid":false,"depositReturned":false,"floor":2,"size":80,"unit":"","folder":"בן יהודה 137","area":"","elevator":false,"parking":false,"balcony":false,"balconySize":0,"mamad":false,"depositType":"מזומן","arnona":0,"vaad":0,"notes":""},{"id":10,"address":"בן יהודה 137 ","city":"תל אביב","rooms":4,"rent":11000,"tenant":"רחל אברהם","tenantPhone":"050-9998887","status":"מושכר","type":"דירה","owner":"לוין ד.","ownerPhone":"052-7776655","contractStart":"2024-10-01","contractEnd":"2025-09-30","deposit":22000,"depositPaid":true,"depositReturned":false,"floor":6,"size":112,"unit":"","folder":"בן יהודה 137","area":"","elevator":false,"parking":false,"balcony":false,"balconySize":0,"mamad":false,"depositType":"מזומן","arnona":0,"vaad":0,"notes":""}],pays:[{"id":1,"address":"בן יהודה 42","tenant":"אבי לוי","amount":7800,"month":"מאי 2025","status":"שולם","date":"01/05/25","propId":null,"payType":"הוראת קבע","desc":"שכ\"ד","invoiceIssued":false,"isActive":true,"periodStart":"","periodEnd":"","owner":"","ownerPhone":""},{"id":2,"address":"דיזנגוף 88","tenant":"מיכל שרון","amount":6200,"month":"מאי 2025","status":"שולם","date":"05/05/25","propId":null,"payType":"הוראת קבע","desc":"שכ\"ד","invoiceIssued":false,"isActive":true,"periodStart":"","periodEnd":"","owner":"","ownerPhone":""},{"id":3,"address":"אלנבי 30","tenant":"יוסי גל","amount":7200,"month":"מאי 2025","status":"ממתין","date":"-","propId":null,"payType":"הוראת קבע","desc":"שכ\"ד","invoiceIssued":false,"isActive":true,"periodStart":"","periodEnd":"","owner":"","ownerPhone":""},{"id":4,"address":"ארלוזורוב 83","tenant":"עמית ברק","amount":18500,"month":"מאי 2025","status":"שולם","date":"01/05/25","propId":null,"payType":"הוראת קבע","desc":"שכ\"ד","invoiceIssued":false,"isActive":true,"periodStart":"","periodEnd":"","owner":"","ownerPhone":""},{"id":5,"address":"רוטשילד 100","tenant":"לירון מזרחי","amount":8800,"month":"מאי 2025","status":"שולם","date":"03/05/25","propId":null,"payType":"הוראת קבע","desc":"שכ\"ד","invoiceIssued":false,"isActive":true,"periodStart":"","periodEnd":"","owner":"","ownerPhone":""},{"id":6,"address":"נחמני 8","tenant":"רחל אברהם","amount":11000,"month":"מאי 2025","status":"ממתין","date":"-","propId":null,"payType":"הוראת קבע","desc":"שכ\"ד","invoiceIssued":false,"isActive":true,"periodStart":"","periodEnd":"","owner":"","ownerPhone":""},{"id":7,"address":"יגאל אלון 57","tenant":"דני כץ","amount":4800,"month":"מאי 2025","status":"באיחור","date":"-","propId":null,"payType":"הוראת קבע","desc":"שכ\"ד","invoiceIssued":false,"isActive":true,"periodStart":"","periodEnd":"","owner":"","ownerPhone":""}],tasks:[{"title":"חתימת חוזה דיזנגוף 263 ","due":"2026-05-18","priority":"גבוהה","type":"חוזה","related":"דיזנגוף 263 ","id":1779036289788,"done":false},{"title":"חידוש חוזה איינשטיין 73","due":"2026-05-18","priority":"גבוהה","type":"חוזה","related":"איינשטיין 73","id":1779036107547,"done":false},{"id":1,"title":"נורדאו 61 הדירה מתפנה ב-31/5 נמצאת כרגע בשיווק ","due":"2026-05-25","priority":"גבוהה","done":false,"type":"שיווק","related":"אשר ברק "},{"id":2,"title":"בן יהודה 224 חייב לצאת לשיווק עד ה-1/6 ","due":"2026-07-30","priority":"גבוהה","done":false,"type":"שיווק","related":"שושנה אוחיון"},{"id":3,"title":"חידוש חוזה שוכרים לסקוב ","due":"2026-06-01","priority":"גבוהה","done":false,"type":"חוזה","related":"לסקוב 5 תל אביב "},{"id":4,"title":"דיווח מעמ מאי","due":"15/05/25","priority":"גבוהה","done":false,"type":"כספי"}],leads:[{"id":1,"name":"שרה כהן","phone":"054-5551234","source":"אתר","budget":"7,000-9,000","area":"צפון תא","status":"חדש","date":"02/05/25","notes":"3 חדרים"},{"id":2,"name":"ניר ברון","phone":"052-3332211","source":"יד2","budget":"5,000-7,000","area":"מרכז תא","status":"בטיפול","date":"30/04/25","notes":"סטודיו"},{"id":3,"name":"מיה טל","phone":"053-2223344","source":"פייסבוק","budget":"6,000-8,000","area":"דרום תא","status":"פגישה נקבעה","date":"25/04/25","notes":"פגישה 8/5"}],expenses:[{"id":1,"address":"בן יהודה 42","vendor":"שלמה אינסטלטור","type":"אינסטלציה","amount":850,"date":"2025-03-15","desc":"תיקון ברז","payMethod":"מזומן","invoiceOk":false,"propId":null},{"id":2,"address":"ארלוזורוב 83","vendor":"חברת מעליות","type":"תחזוקה","amount":2200,"date":"2025-04-02","desc":"שירות שנתי","payMethod":"מזומן","invoiceOk":false,"propId":null},{"id":3,"address":"דיזנגוף 88","vendor":"צבי צבע","type":"צביעה","amount":3500,"date":"2025-01-10","desc":"צביעה לפני שוכר","payMethod":"מזומן","invoiceOk":false,"propId":null}],mgmt:[{"id":1779255573032,"propId":1779255429582,"address":"דיזנגוף 263","owner":"ענבל אשכולי","ownerPhone":"","feeType":"הוראת קבע","monthlyFee":734,"annualFee":0,"desc":"דמי ניהול","periodStart":"2026-08-07","periodEnd":"2027-08-06","status":"פעיל","lastPaid":"01.08.2026","invoiceIssued":false,"notes":""},{"id":1779255188593,"propId":1,"address":"בן יהודה 224 ","owner":"שושנה אוחיון","ownerPhone":"","feeType":"שנתי","monthlyFee":0,"annualFee":3250,"desc":"דמי ניהול","periodStart":"2026-11-01","periodEnd":"2027-10-31","status":"פעיל","lastPaid":"01.07.2025","invoiceIssued":false,"notes":""},{"id":1779254988688,"propId":2,"address":"ויצמן 13","owner":"מירב מדלן כהן ","ownerPhone":"","feeType":"הוראת קבע","monthlyFee":1376,"annualFee":0,"desc":"דמי ניהול","periodStart":"2026-08-01","periodEnd":"2027-07-31","status":"פעיל","lastPaid":"","invoiceIssued":true,"notes":""},{"id":1779254625401,"propId":1778593719102,"address":"בן יהודה 137 ","owner":"","ownerPhone":"","feeType":"שנתי","monthlyFee":0,"annualFee":32332,"desc":"דמי ניהול","periodStart":"","periodEnd":"","status":"פעיל","lastPaid":"27.10.2025","invoiceIssued":true,"notes":""},{"id":1779254461542,"propId":1778593841403,"address":"לסקוב 16","owner":"רונה ויהונתן הרמן ","ownerPhone":"","feeType":"הוראת קבע","monthlyFee":825,"annualFee":0,"desc":"דמי ניהול","periodStart":"2026-06-10","periodEnd":"2027-06-09","status":"פעיל","lastPaid":"","invoiceIssued":true,"notes":""},{"id":1779254239417,"propId":1778593848562,"address":"איינשטיין 73 ","owner":"משפחת שוורצקוף","ownerPhone":"","feeType":"הוראת קבע","monthlyFee":758,"annualFee":0,"desc":"דמי ניהול","periodStart":"2026-07-15","periodEnd":"2027-07-14","status":"פעיל","lastPaid":"","invoiceIssued":true,"notes":""}],activities:{},contracts:[{"id":1779201857059,"filename":"","fileData":null,"propId":1778593848562,"address":"איינשטיין 73 ","type":"שכירות","yearRange":"2026-2027","amount":7700,"notes":"","uploadDate":"19.5.2026"},{"id":1779201824877,"filename":"","fileData":null,"propId":1778593848562,"address":"איינשטיין 73 ","type":"שכירות","yearRange":"2026-2027","amount":7700,"notes":"","uploadDate":"19.5.2026"}]};
+// ─── STATE ────────────────────────────────────────────────────────────────
+const ld = k=>{try{const v=localStorage.getItem("hp_"+k);return v?JSON.parse(v):null}catch(e){return null}};
+const sv = (k,v)=>{try{localStorage.setItem("hp_"+k,JSON.stringify(v))}catch(e){}};
+const S = {};
+Object.keys(SEED).forEach(function(k){
+  var stored = ld(k);
+  // Use SEED if nothing stored, OR if stored is empty and SEED has data
+  if(stored === null || stored === undefined){
+    S[k] = JSON.parse(JSON.stringify(SEED[k]));
+  } else if(Array.isArray(stored) && stored.length === 0 && Array.isArray(SEED[k]) && SEED[k].length > 0){
+    S[k] = JSON.parse(JSON.stringify(SEED[k]));
+  } else if(typeof stored === 'object' && !Array.isArray(stored) && Object.keys(stored).length === 0 && Object.keys(SEED[k]).length > 0){
+    S[k] = JSON.parse(JSON.stringify(SEED[k]));
+  } else {
+    S[k] = stored;
+  }
+});
+S.photos = ld("photos")||{};
+S.contracts = ld("contracts")||[];
+
+let page="dash", svTimer=null;
+const fmt = n=>"₪"+Number(n||0).toLocaleString("he-IL");
+const TODAY = new Date("2025-05-13");
+const dd = d=>d?Math.round((new Date(d)-TODAY)/86400000):null;
+const gv = id=>document.getElementById(id)?.value||"";
+const gc = id=>!!document.getElementById(id)?.checked;
+const se = (id,val)=>{const el=document.getElementById(id);if(el)el.value=val||"";};
+
+// Compress image to fit localStorage limits
+function compressImage(dataUrl, maxW, quality, callback){
+  if(dataUrl.indexOf('data:image')<0){callback(dataUrl);return;}
+  var img=new Image();
+  img.onload=function(){
+    var w=img.width,h=img.height;
+    var ratio=Math.min(maxW/w,maxW/h,1);
+    var cw=Math.round(w*ratio),ch=Math.round(h*ratio);
+    var canvas=document.createElement('canvas');
+    canvas.width=cw;canvas.height=ch;
+    var ctx=canvas.getContext('2d');
+    ctx.drawImage(img,0,0,cw,ch);
+    callback(canvas.toDataURL('image/jpeg',quality));
+  };
+  img.onerror=function(){callback(dataUrl);};
+  img.src=dataUrl;
+}
+
+// Safe localStorage save with quota check
+function safeLocalSave(key, value){
+  try{
+    localStorage.setItem('hpc_'+key, JSON.stringify(value));
+    return true;
+  } catch(e){
+    if(e.name==='QuotaExceededError'||e.code===22){
+      console.warn('localStorage quota exceeded for key:', key);
+      return false;
+    }
+    return false;
+  }
+}
+
+function saveAll(){
+  var saved=true;
+  // Save all SEED-based keys
+  ['props','pays','tasks','leads','expenses','mgmt','activities'].forEach(function(k){
+    if(S[k]!==undefined) saved=safeLocalSave(k,S[k])&&saved;
+  });
+  // Save special keys
+  saved=safeLocalSave('photos',S.photos)&&saved;
+  saved=safeLocalSave('contracts',S.contracts)&&saved;
+  if(!saved) console.warn('Some data could not be saved due to storage limits');
+  // Show save indicator
+  var el=document.getElementById('sv-ind')||document.getElementById('SVIND');
+  if(el){el.style.opacity=1;clearTimeout(svTimer);svTimer=setTimeout(function(){el.style.opacity=0;},2200);}
+}
+function resetAll(){
+  if(!confirm("למחוק הכל ולחזור לדוגמה?"))return;
+  Object.keys(SEED).forEach(k=>{S[k]=JSON.parse(JSON.stringify(SEED[k]));try{localStorage.removeItem("hp_"+k)}catch(e){}});
+  S.photos={};sv("photos",{});closeM();render();
+}
+
+// ─── MODAL ────────────────────────────────────────────────────────────────
+function openM(title,html){
+  document.getElementById("m-title").textContent=title;
+  document.getElementById("m-body").innerHTML=html;
+  document.getElementById("overlay").classList.add("show");
+}
+function closeM(){document.getElementById("overlay").classList.remove("show")}
+
+// ─── HELPERS ─────────────────────────────────────────────────────────────
+function fg(label,id,type,val,extra=""){
+  val=String(val||"").replace(/"/g,"&quot;").replace(/</g,"&lt;");
+  return `<div class="fg"><label>${label}</label><input id="${id}" type="${type}" value="${val}" ${extra}></div>`;
+}
+function fsel(label,id,opts,val){
+  return `<div class="fg"><label>${label}</label><select id="${id}">${opts.map(o=>`<option${o===val?" selected":""}>${o}</option>`).join("")}</select></div>`;
+}
+function fchk(label,id,checked){
+  return `<div style="display:flex;align-items:center;gap:8px;margin-top:2px"><input type="checkbox" id="${id}"${checked?" checked":""} style="width:16px;height:16px;accent-color:#1D6FA4"><label for="${id}" style="font-size:13px;cursor:pointer;font-weight:500">${label}</label></div>`;
+}
+const getAlerts=()=>{
+  const o=[];
+  S.props.forEach(p=>{
+    const d=dd(p.contractEnd);
+    if(d!==null&&d<0) o.push({type:"קריטי",icon:"🚨",text:`חוזה פג – ${p.address} (לפני ${Math.abs(d)} ימים)`});
+    else if(d!==null&&d<=30) o.push({type:"קריטי",icon:"⚠️",text:`חוזה מסתיים בעוד ${d} ימים – ${p.address}`});
+    else if(d!==null&&d<=90) o.push({type:"אזהרה",icon:"📋",text:`חוזה מסתיים בעוד ${d} ימים – ${p.address}`});
+    if(p.status==="פנוי") o.push({type:"אזהרה",icon:"🏠",text:`נכס פנוי – ${p.address} | ${fmt(p.rent)}/חודש`});
+    if(p.deposit>0&&!p.depositPaid) o.push({type:"קריטי",icon:"💰",text:`פיקדון חסר – ${p.address} | ${fmt(p.deposit)}`});
+  });
+  return o.sort((a,b)=>(a.type==="קריטי"?0:1)-(b.type==="קריטי"?0:1));
+};
+
+// ─── NAV ─────────────────────────────────────────────────────────────────
+const NAV=[
+  {id:"dash",label:"דשבורד",e:"📊"},{id:"props",label:"נכסים",e:"🏢"},
+  {id:"alerts",label:"התראות",e:"🔔"},{id:"leads",label:"לידים",e:"👥"},
+  {id:"pays",label:"תשלומים",e:"💰"},{id:"deposits",label:"פיקדונות",e:"🔐"},
+  {id:"tasks",label:"משימות",e:"✅"},{id:"mgmt",label:"ניהול נכס",e:"🗂"},{id:"contracts",label:"חוזים",e:"📋"},{id:"expenses",label:"הוצאות",e:"🔧"},
+];
+const TITLES={dash:"📊 דשבורד",props:"🏢 נכסים",alerts:"🔔 התראות",leads:"👥 לידים",pays:"💰 תשלומים",deposits:"🔐 פיקדונות",tasks:"✅ משימות",mgmt:"🗂 ניהול נכס",contracts:"📋 חוזים",expenses:"🔧 הוצאות"};
+
+function addToCalendar(taskId){
+  var t=S.tasks.find(function(x){return x.id===taskId;});if(!t)return;
+  var title=encodeURIComponent(t.title);
+  var detail=encodeURIComponent('Homepic CRM - '+t.type);
+  var dateStr='';
+  if(t.due){var d=t.due.replace(/-/g,'');dateStr=d+'T090000/'+d+'T100000';}
+  else{var n=new Date();var ds=n.getFullYear()+String(n.getMonth()+1).padStart(2,'0')+String(n.getDate()).padStart(2,'0');dateStr=ds+'T090000/'+ds+'T100000';}
+  window.open('https://calendar.google.com/calendar/render?action=TEMPLATE&text='+title+'&dates='+dateStr+'&details='+detail+'&add=roy%40homepic.co.il&ctz=Asia%2FJerusalem','_blank');
+}
+
+function exportData(){
+  var d=Object.assign({},S,{photos:S.photos,activities:S.activities||{}});
+  var b=new Blob([JSON.stringify(d,null,2)],{type:"application/json"});
+  var a=document.createElement("a");
+  a.href=URL.createObjectURL(b);
+  a.download="homepic-backup-"+new Date().toLocaleDateString("he-IL").replace(/\//g,"-")+".json";
+  a.click();
+}
+function importData(ev){
+  var f=ev.target.files[0];if(!f)return;
+  var r=new FileReader();
+  r.onload=function(e){
+    try{
+      var d=JSON.parse(e.target.result);
+      ["props","pays","tasks","leads","expenses"].forEach(function(k){if(d[k])S[k]=d[k];});
+      if(d.photos)S.photos=d.photos;
+      if(d.activities)S.activities=d.activities;
+      if(d.mgmt)S.mgmt=d.mgmt;
+      if(d.contracts)S.contracts=d.contracts;
+      saveAll();render();alert("יובא בהצלחה!");
+    }catch(x){alert("שגיאה בקובץ הגיבוי");}
+  };r.readAsText(f);
+}
+function render(){
+  const crit=getAlerts().filter(a=>a.type==="קריטי").length;
+  document.getElementById("nav").innerHTML=NAV.map(n=>`<button class="nav-btn${page===n.id?" on":""}" onclick="goTo('${n.id}')"><span style="font-size:16px">${n.e}</span>${n.label}${n.id==="alerts"&&crit>0?`<span style="background:#EF4444;color:#fff;border-radius:50%;width:18px;height:18px;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;margin-right:auto">${crit}</span>`:""}</button>`).join("");
+  document.getElementById("pg-title").textContent=TITLES[page]||"";
+  document.getElementById("p-cnt").textContent=S.props.length+" נכסים";
+  const pages={dash:rDash,props:rProps,alerts:rAlerts,leads:rLeads,pays:rPays,deposits:rDeps,tasks:rTasks,mgmt:rMgmt,contracts:rContracts,expenses:rExp};
+  document.getElementById("main").innerHTML=(pages[page]||rDash)();
+}
+function goTo(p){page=p;render()}
+
+// ─── DASHBOARD ───────────────────────────────────────────────────────────
+function rDash(){
+  const rented=S.props.filter(p=>p.status==="מושכר");
+  const income=rented.reduce((s,p)=>s+Number(p.rent),0);
+  const bars=[{m:"ינו",v:148000},{m:"פבר",v:155000},{m:"מרץ",v:162000},{m:"אפר",v:158000},{m:"מאי",v:income}];
+  const maxB=Math.max(...bars.map(b=>b.v));
+  const crit=getAlerts().filter(a=>a.type==="קריטי");
+  return `<div style="display:flex;gap:14px;margin-bottom:20px;flex-wrap:wrap">
+    <div class="stat" style="border-top:3px solid #10B981"><div style="font-size:10px;color:#94A3B8;font-weight:700;text-transform:uppercase;margin-bottom:4px">הכנסה חודשית</div><div style="font-size:24px;font-weight:800">${fmt(income)}</div><div style="font-size:11px;color:#94A3B8;margin-top:3px">${rented.length} מושכרים</div></div>
+    <div class="stat" style="border-top:3px solid #F59E0B"><div style="font-size:10px;color:#94A3B8;font-weight:700;text-transform:uppercase;margin-bottom:4px">פנויים</div><div style="font-size:24px;font-weight:800">${S.props.filter(p=>p.status==="פנוי").length}</div></div>
+    <div class="stat" style="border-top:3px solid #EF4444"><div style="font-size:10px;color:#94A3B8;font-weight:700;text-transform:uppercase;margin-bottom:4px">התראות קריטיות</div><div style="font-size:24px;font-weight:800">${crit.length}</div></div>
+    <div class="stat" style="border-top:3px solid #F59E0B"><div style="font-size:10px;color:#94A3B8;font-weight:700;text-transform:uppercase;margin-bottom:4px">לגבייה</div><div style="font-size:24px;font-weight:800">${S.pays.filter(p=>p.status!=="שולם").length}</div></div>
+    <div class="stat" style="border-top:3px solid #0D1B2A"><div style="font-size:10px;color:#94A3B8;font-weight:700;text-transform:uppercase;margin-bottom:4px">משימות פתוחות</div><div style="font-size:24px;font-weight:800">${S.tasks.filter(t=>!t.done).length}</div></div>
+  </div>
+  ${crit.length>0?`<div style="background:#FEF2F2;border:1px solid #FECACA;border-radius:12px;padding:14px 18px;margin-bottom:18px"><div style="font-weight:700;color:#DC2626;margin-bottom:8px;font-size:14px">🚨 דחוף לטיפול</div>${crit.slice(0,3).map(a=>`<div style="font-size:13px;color:#991B1B;margin-bottom:4px">${a.icon} ${a.text}</div>`).join("")}</div>`:""}
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px">
+    <div class="card"><div style="font-weight:700;margin-bottom:16px;font-size:14px">הכנסות – 5 חודשים</div>
+      <div style="display:flex;align-items:flex-end;gap:12px;height:110px">${bars.map((b,i)=>`<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px"><div style="font-size:9px;color:#1D6FA4;font-weight:700;opacity:${i===4?1:0}">${(b.v/1000).toFixed(0)}K</div><div style="width:100%;background:${i===4?"#1D6FA4":"#E2E8F0"};border-radius:4px 4px 0 0;height:${(b.v/maxB*90)}px"></div><div style="font-size:10px;color:${i===4?"#1D6FA4":"#94A3B8"};font-weight:${i===4?700:400}">${b.m}</div></div>`).join("")}</div>
+    </div>
+    <div class="card"><div style="font-weight:700;margin-bottom:14px;font-size:14px">חוזים מסתיימים בקרוב</div>
+      ${S.props.filter(p=>p.contractEnd&&p.status==="מושכר").sort((a,b)=>new Date(a.contractEnd)-new Date(b.contractEnd)).slice(0,6).map(p=>{const d=dd(p.contractEnd);const col=d<0?"#DC2626":d<=30?"#DC2626":d<=90?"#D97706":"#059669";return`<div style="display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid #F1F5F9"><div style="width:7px;height:7px;border-radius:50%;background:${col};flex-shrink:0"></div><button onclick="viewProp(${p.id})" style="flex:1;text-align:right;background:none;border:none;cursor:pointer;font-size:12px;font-weight:500;color:#1D6FA4">${p.address}</button><div style="font-size:11px;color:${col};font-weight:700">${d<0?`פג ${Math.abs(d)}י`:`${d}י`}</div></div>`;}).join("")}
+    </div>
+    <div class="card"><div style="font-weight:700;margin-bottom:14px;font-size:14px">תשלומים לגבייה</div>
+      ${S.pays.filter(p=>p.status!=="שולם").map(p=>`<div style="display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid #F1F5F9"><div style="flex:1"><div style="font-size:12px;font-weight:600">${p.address}</div><div style="font-size:10px;color:#94A3B8">${p.tenant}</div></div><div style="font-weight:700;color:${p.status==="באיחור"?"#DC2626":"#D97706"};font-size:13px">${fmt(p.amount)}</div><span class="badge ${p.status==="באיחור"?"br":"by"}">${p.status}</span></div>`).join("")}
+    </div>
+    <div class="card"><div style="font-weight:700;margin-bottom:14px;font-size:14px">משימות דחופות</div>
+      ${S.tasks.filter(t=>!t.done&&t.priority==="גבוהה").slice(0,5).map(t=>`<div style="display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid #F1F5F9"><div style="width:6px;height:6px;border-radius:50%;background:#EF4444;flex-shrink:0"></div><div style="flex:1;font-size:12px;font-weight:500">${t.title}</div><div style="font-size:11px;color:#94A3B8">${t.due||""}</div></div>`).join("")}
+    </div>
+  </div>`;
+}
+
+// ─── VIEW PROPERTY (read-only) ────────────────────────────────────────────
+function viewProp(id){
+  const p=S.props.find(x=>x.id===id); if(!p) return;
+  const photos=S.photos[id]||[];
+  const propPays=S.pays.filter(x=>x.address===p.address).slice(0,5);
+  const propExp=S.expenses.filter(x=>x.propId===id).slice(0,4);
+  const d=dd(p.contractEnd);
+  const cc=d===null?"#94A3B8":d<0?"#DC2626":d<=30?"#DC2626":d<=90?"#D97706":"#059669";
+  const cl=d===null?"—":d<0?`⚠ פג לפני ${Math.abs(d)} ימים`:d<=30?`⚠ ${d} ימים`:d+" ימים לסיום";
+  const sc=p.status==="מושכר"?"bg":p.status==="פנוי"?"by":"bb";
+  const extras=[p.parking?"🚗 חניה":"",p.balcony?`🌿 מרפסת${p.balconySize>0?" "+p.balconySize+'מר':""}`:"",(p.arnona>0?"ארנונה "+fmt(p.arnona)+"/חודש":""),(p.vaad>0?"ועד בית "+fmt(p.vaad)+"/חודש":"")].filter(Boolean).join("  |  ");
+
+  openM("🏠 "+p.address,`
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;flex-wrap:wrap">
+      <span class="badge ${sc}">${p.status}</span>
+      <span style="font-size:13px;color:#64748B">${p.type}${p.rooms>0?" · "+p.rooms+" חד'":""}${p.floor>0?" · קומה "+p.floor:""}${p.size>0?" · "+p.size+'מר':""}</span>
+      <div style="flex:1"></div>
+      <button class="sm blue" onclick="closeM();setTimeout(()=>openM('עריכה – ${p.address.replace(/'/g,"\'")}',propForm(S.props.find(x=>x.id===${id}))),50)">✏️ עריכה</button>
+      <button class="sm" style="background:#FEF3C7;color:#92400E" onclick="closeM();setTimeout(()=>openPhotos(${id}),50)">📸 תמונות</button>
+      <button class="sm" style="background:#D1FAE5;color:#065F46" onclick="closeM();setTimeout(()=>shareModal(${id}),50)">📤 שתף</button>
+    </div>
+
+    ${photos.length>0?`<div style="display:flex;gap:8px;overflow-x:auto;margin-bottom:14px;padding-bottom:4px">${photos.map(ph=>`<img src="${ph.data}" style="height:90px;min-width:130px;max-width:160px;object-fit:cover;border-radius:8px;border:1px solid #E2E8F0;flex-shrink:0" title="${ph.year||""}${ph.caption?" – "+ph.caption:""}">`).join("")}</div>`:""}
+
+    <div style="display:flex;gap:10px;margin-bottom:14px">
+      <div style="flex:1;background:#F0FDF4;border-radius:10px;padding:12px;text-align:center"><div style="font-size:10px;color:#94A3B8;font-weight:700;text-transform:uppercase;margin-bottom:3px">שכירות חודשית</div><div style="font-size:22px;font-weight:800;color:#059669">${fmt(p.rent)}</div></div>
+      <div style="flex:1;background:#EFF6FF;border-radius:10px;padding:12px;text-align:center"><div style="font-size:10px;color:#94A3B8;font-weight:700;text-transform:uppercase;margin-bottom:3px">פיקדון</div><div style="font-size:18px;font-weight:800;color:#1D6FA4">${p.deposit>0?fmt(p.deposit):"—"}</div><div style="font-size:10px;color:#64748B">${p.depositType||""}</div></div>
+      <div style="flex:1;background:${d!==null&&d<=30?"#FEF2F2":"#F8FAFC"};border-radius:10px;padding:12px;text-align:center"><div style="font-size:10px;color:#94A3B8;font-weight:700;text-transform:uppercase;margin-bottom:3px">חוזה עד</div><div style="font-size:14px;font-weight:700;color:${cc}">${p.contractEnd||"—"}</div><div style="font-size:11px;color:${cc};margin-top:2px">${cl}</div></div>
+    </div>
+
+    <div style="margin-bottom:12px">
+      ${p.tenant&&p.tenant!=="-"?`<div style="display:flex;padding:7px 0;border-bottom:1px solid #F1F5F9"><div style="width:120px;font-size:11px;font-weight:700;color:#94A3B8;text-transform:uppercase">שוכר</div><div style="font-size:13px">${p.tenant}${p.tenantPhone?` <a href="tel:${p.tenantPhone}" style="color:#1D6FA4;text-decoration:none">📞 ${p.tenantPhone}</a>`:""}</div></div>`:""}
+      ${p.owner?`<div style="display:flex;padding:7px 0;border-bottom:1px solid #F1F5F9"><div style="width:120px;font-size:11px;font-weight:700;color:#94A3B8;text-transform:uppercase">בעלים</div><div style="font-size:13px">${p.owner}${p.ownerPhone?` <a href="tel:${p.ownerPhone}" style="color:#1D6FA4;text-decoration:none">📞 ${p.ownerPhone}</a>`:""}</div></div>`:""}
+      ${p.contractStart?`<div style="display:flex;padding:7px 0;border-bottom:1px solid #F1F5F9"><div style="width:120px;font-size:11px;font-weight:700;color:#94A3B8;text-transform:uppercase">תחילת חוזה</div><div style="font-size:13px">${p.contractStart}</div></div>`:""}
+      ${extras?`<div style="display:flex;padding:7px 0;border-bottom:1px solid #F1F5F9"><div style="width:120px;font-size:11px;font-weight:700;color:#94A3B8;text-transform:uppercase">נוספות</div><div style="font-size:13px">${extras}</div></div>`:""}
+      ${p.notes?`<div style="display:flex;padding:7px 0;border-bottom:1px solid #F1F5F9"><div style="width:120px;font-size:11px;font-weight:700;color:#94A3B8;text-transform:uppercase">הערות</div><div style="font-size:13px;color:#64748B">${p.notes}</div></div>`:""}
+      <div style="display:flex;padding:7px 0"><div style="width:120px;font-size:11px;font-weight:700;color:#94A3B8;text-transform:uppercase">פיקדון שולם</div><div style="font-size:13px;color:${p.depositPaid?"#059669":"#DC2626"};font-weight:600">${p.depositPaid?"✓ שולם":"✗ טרם שולם"}</div></div>
+    </div>
+
+    ${propPays.length>0?`<div style="margin-bottom:12px"><div style="font-size:11px;font-weight:700;color:#94A3B8;text-transform:uppercase;margin-bottom:8px">תשלומים אחרונים</div>${propPays.map(x=>{const sc=x.status==="שולם"?"#059669":x.status==="ממתין"?"#D97706":"#DC2626";return`<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid #F1F5F9"><div style="flex:1;font-size:12px">${x.month}</div><div style="font-size:13px;font-weight:700;color:#1D6FA4">${fmt(x.amount)}</div><span style="font-size:11px;color:${sc};font-weight:600">${x.status}</span><span style="font-size:11px;color:#94A3B8">${x.date}</span></div>`;}).join("")}</div>`:""}
+
+    ${propExp.length>0?`<div><div style="font-size:11px;font-weight:700;color:#94A3B8;text-transform:uppercase;margin-bottom:8px">הוצאות אחרונות</div>${propExp.map(e=>`<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid #F1F5F9"><div style="flex:1;font-size:12px">${e.vendor} – ${e.desc||e.type}</div><div style="font-size:13px;font-weight:700;color:#EF4444">${fmt(e.amount)}</div><span style="font-size:10px;color:${e.invoiceReceived?"#059669":"#D97706"}">${e.invoiceReceived?"✓ חשבונית":"⚠ חסרה"}</span></div>`).join("")}</div>`:""}
+  `);
+}
+
+// ─── PROPERTIES ──────────────────────────────────────────────────────────
+function propForm(p){
+  const v=p||{address:"",city:"תל אביב",area:"",building:"",rooms:"",rent:"",type:"דירה",status:"פנוי",owner:"",ownerPhone:"",tenant:"-",tenantPhone:"",contractStart:"",contractEnd:"",deposit:"",depositType:"מזומן",depositPaid:false,depositReturned:false,floor:"",size:"",arnona:"",vaad:"",parking:false,balcony:false,balconySize:"",notes:""};
+  const isNew=!p;
+  return `<div>
+    <div class="sec"><div class="sec-lbl">פרטי הנכס</div>
+      <div style="display:flex;flex-wrap:wrap;gap:10px">
+        ${fg("כתובת","pf_a","text",v.address,"placeholder='רחוב + מספר'")}
+        ${fg("עיר","pf_b","text",v.city)}
+        ${fsel("אזור","pf_area",["","צפון ישן (רמת אביב)","צפון תל אביב","מרכז תל אביב","דרום תל אביב","יפו","רמת גן","גבעתיים","הרצליה","אחר"],v.area||"")}
+        ${fg("בניין/קבוצה","pf_z","text",v.building||"","placeholder='בן יהודה 137'")}
+        ${fsel("סוג","pf_c",["דירה","סטודיו","פנטהאוז","דירת גן","מסחרי","חנות","גג"],v.type)}
+        ${fsel("סטטוס","pf_d",["מושכר","פנוי","בטיפול"],v.status)}
+        ${fg("חדרים","pf_e","number",v.rooms,"min='0' step='0.5' placeholder='2.5'")}
+        ${fg("גודל מר","pf_f","number",v.size)}
+        ${fg("קומה","pf_g","number",v.floor)}
+        ${fg("שכירות ₪","pf_h","number",v.rent)}
+      </div>
+    </div>
+    <div class="sec"><div class="sec-lbl">בעלים ושוכר</div>
+      <div style="display:flex;flex-wrap:wrap;gap:10px">
+        ${fg("בעלים","pf_i","text",v.owner)}
+        ${fg("טל' בעלים","pf_j","text",v.ownerPhone)}
+        ${fg("שוכר","pf_k","text",v.tenant)}
+        ${fg("טל' שוכר","pf_l","text",v.tenantPhone)}
+      </div>
+    </div>
+    <div class="sec"><div class="sec-lbl">חוזה ופיקדון</div>
+      <div style="display:flex;flex-wrap:wrap;gap:10px;margin-bottom:10px">
+        ${fg("תחילת חוזה","pf_m","date",v.contractStart)}
+        ${fg("סיום חוזה","pf_n","date",v.contractEnd)}
+        ${fg("פיקדון ₪","pf_o","number",v.deposit)}
+        ${fsel("סוג פיקדון","pf_dt",["מזומן","ערבות בנקאית","צ'ק בנקאי","שיק ביטחון"],v.depositType||"מזומן")}
+      </div>
+      <div style="display:flex;gap:20px">${fchk("פיקדון שולם","pf_p",v.depositPaid)}${fchk("פיקדון הוחזר","pf_q",v.depositReturned)}</div>
+    </div>
+    <div class="sec"><div class="sec-lbl">פרטים נוספים</div>
+      <div style="display:flex;flex-wrap:wrap;gap:10px;margin-bottom:10px">
+        ${fg("ארנונה ₪/חודש","pf_ar","number",v.arnona||0)}
+        ${fg("ועד בית ₪/חודש","pf_va","number",v.vaad||0)}
+        ${fg("גודל מרפסת מר","pf_bs","number",v.balconySize||0)}
+      </div>
+      <div style="display:flex;gap:20px;margin-bottom:10px">${fchk("🚗 חניה","pf_pk",v.parking)}${fchk("🌿 מרפסת","pf_bl",v.balcony)}</div>
+      ${fg("הערות","pf_nt","text",v.notes,"placeholder='הערות חופשיות...'")}
+    </div>
+    <div style="display:flex;gap:8px">
+      <button class="btn green" onclick="saveProp(${isNew?-1:v.id})" style="flex:2">✓ שמור נכס</button>
+      <button class="btn gray" onclick="closeM()" style="flex:1">ביטול</button>
+    </div>
+  </div>`;
+}
+
+function saveProp(id){
+  const v={address:gv("pf_a"),city:gv("pf_b"),area:gv("pf_area"),building:gv("pf_z"),type:gv("pf_c"),status:gv("pf_d"),
+    rooms:+gv("pf_e")||0,size:+gv("pf_f")||0,floor:+gv("pf_g")||0,rent:+gv("pf_h")||0,
+    owner:gv("pf_i"),ownerPhone:gv("pf_j"),tenant:gv("pf_k")||"-",tenantPhone:gv("pf_l"),
+    contractStart:gv("pf_m"),contractEnd:gv("pf_n"),
+    deposit:+gv("pf_o")||0,depositType:gv("pf_dt")||"מזומן",depositPaid:gc("pf_p"),depositReturned:gc("pf_q"),
+    arnona:+gv("pf_ar")||0,vaad:+gv("pf_va")||0,balconySize:+gv("pf_bs")||0,
+    parking:gc("pf_pk"),balcony:gc("pf_bl"),notes:gv("pf_nt")};
+  if(id===-1){S.props.unshift({...v,id:Date.now()});}
+  else{const i=S.props.findIndex(p=>p.id===id);if(i>-1)S.props[i]={...S.props[i],...v};}
+  saveAll();closeM();render();
+}
+function delProp(id){if(!confirm("למחוק נכס זה?"))return;S.props=S.props.filter(p=>p.id!==id);saveAll();render();}
+
+function rProps(){
+  const income=S.props.filter(p=>p.status==="מושכר").reduce((s,p)=>s+Number(p.rent),0);
+  return `<div style="display:flex;gap:14px;margin-bottom:16px;flex-wrap:wrap;align-items:center">
+    <div class="stat" style="border-top:3px solid #10B981;max-width:200px"><div style="font-size:10px;color:#94A3B8;font-weight:700;text-transform:uppercase;margin-bottom:4px">הכנסה חודשית</div><div style="font-size:22px;font-weight:800">${fmt(income)}</div></div>
+    <div class="stat" style="border-top:3px solid #F59E0B;max-width:130px"><div style="font-size:10px;color:#94A3B8;font-weight:700;text-transform:uppercase;margin-bottom:4px">פנויים</div><div style="font-size:22px;font-weight:800">${S.props.filter(p=>p.status==="פנוי").length}</div></div>
+    <div class="stat" style="border-top:3px solid #1D6FA4;max-width:130px"><div style="font-size:10px;color:#94A3B8;font-weight:700;text-transform:uppercase;margin-bottom:4px">סה"כ</div><div style="font-size:22px;font-weight:800">${S.props.length}</div></div>
+    <div style="flex:1"></div>
+    <button class="btn blue" onclick="openM('נכס חדש',propForm(null))">+ נכס חדש</button>
+  </div>
+  <div style="background:#fff;border-radius:14px;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,.08)">
+  <table class="T"><thead><tr>
+    <th>כתובת</th><th>סוג</th><th>חד'</th><th>שכ"ד</th><th>שוכר</th><th>בעלים</th><th>חוזה עד</th><th>פיקדון</th><th>נוספות</th><th>סטטוס</th><th></th>
+  </tr></thead><tbody>
+  ${S.props.map((p,i)=>{
+    const d=dd(p.contractEnd);
+    const cc=d===null?"#94A3B8":d<0?"#DC2626":d<=30?"#DC2626":d<=90?"#D97706":"#059669";
+    const sc=p.status==="מושכר"?"bg":p.status==="פנוי"?"by":"bb";
+    const ph=(S.photos[p.id]||[]).length;
+    const ex=[p.parking?"🚗":"",p.balcony?"🌿":"",p.vaad>0?"ועד ₪"+Number(p.vaad).toLocaleString():"",ph>0?"📸"+ph:""].filter(Boolean).join(" ");
+    return`<tr style="background:${i%2===0?"#fff":"#FAFBFF"}">
+      <td><button onclick="viewProp(${p.id})" style="background:none;border:none;cursor:pointer;font-size:13px;font-weight:600;color:#1D6FA4;text-decoration:underline;text-underline-offset:2px;font-family:Heebo,sans-serif;padding:0;text-align:right">${p.address}</button></td>
+      <td style="color:#64748B">${p.type}</td>
+      <td style="color:#64748B">${p.rooms||"—"}</td>
+      <td style="font-weight:700;color:#1D6FA4">${fmt(p.rent)}</td>
+      <td style="color:${p.tenant==="-"?"#94A3B8":"#0F172A"}">${p.tenant}</td>
+      <td style="color:#64748B">${p.owner}</td>
+      <td style="color:${cc};font-weight:${d!==null&&d<=90?700:400};font-size:11px">${p.contractEnd||"—"}</td>
+      <td style="font-size:11px;color:${p.depositPaid?"#059669":"#DC2626"}">${p.deposit>0?(p.depositPaid?"✓ "+fmt(p.deposit):"✗ "+fmt(p.deposit))+(p.depositType&&p.depositType!=="מזומן"?" ("+p.depositType.slice(0,3)+")":""):"—"}</td>
+      <td style="font-size:12px;color:#64748B">${ex||"—"}</td>
+      <td><span class="badge ${sc}">${p.status}</span></td>
+      <td><div style="display:flex;gap:4px">
+        <button class="sm" style="background:#EFF6FF;color:#1D6FA4" onclick='openM("עריכה",propForm(S.props.find(x=>x.id===${p.id})))'>✏️</button>
+        <button class="sm" style="background:#FEF3C7;color:#92400E" onclick="openPhotos(${p.id})">📸</button>
+        <button class="sm" style="background:#D1FAE5;color:#065F46" onclick="shareModal(${p.id})">📤</button>
+        <button class="sm" style="background:#FEF2F2;color:#991B1B" onclick="delProp(${p.id})">🗑</button>
+      </div></td>
+    </tr>`;
+  }).join("")}
+  </tbody></table></div>`;
+}
+
+// ─── PHOTOS ──────────────────────────────────────────────────────────────
+function openPhotos(propId){
+  const p=S.props.find(x=>x.id===propId);if(!p)return;
+  const photos=S.photos[propId]||[];
+  openM("📸 תמונות – "+p.address,`<div>
+    <div style="display:flex;flex-wrap:wrap;gap:10px;margin-bottom:16px">
+      ${photos.map((ph,i)=>`<div style="text-align:center">
+        <img src="${ph.data}" style="width:140px;height:95px;object-fit:cover;border-radius:8px;border:1px solid #E2E8F0">
+        <div style="font-size:10px;color:#64748B;margin-top:3px">${ph.year||""}${ph.caption?" – "+ph.caption:""}</div>
+        <a href="${ph.data}" download="נכס_${i+1}.jpg" style="font-size:10px;color:#1D6FA4;text-decoration:none;margin-left:8px">⬇</a>
+        <button onclick="delPhoto(${propId},${i})" style="font-size:10px;color:#991B1B;background:none;border:none;cursor:pointer">✕</button>
+      </div>`).join("")}
+      ${photos.length===0?`<div style="color:#94A3B8;font-size:13px;padding:16px">אין תמונות עדיין</div>`:""}
+    </div>
+    <div class="sec"><div class="sec-lbl">הוספת תמונות</div>
+      <div style="display:flex;flex-wrap:wrap;gap:10px;margin-bottom:10px">
+        <div class="fg"><label>קבצים (תמונות)</label><input type="file" id="phf" accept="image/*,application/pdf" multiple style="font-size:12px;padding:6px;border:1px dashed #E2E8F0;border-radius:8px;background:#F8FAFC"></div>
+        <div class="fg" style="max-width:90px"><label>שנה</label><input id="phy" type="number" placeholder="${new Date().getFullYear()}" style="font-size:13px;padding:7px;border-radius:8px;border:1px solid #E2E8F0;width:100%"></div>
+        <div class="fg"><label>תיאור</label><input id="phc" type="text" placeholder="סלון, מטבח..." style="font-size:13px;padding:7px;border-radius:8px;border:1px solid #E2E8F0;width:100%"></div>
+      </div>
+      <button class="btn blue" onclick="addPhotos(${propId})" style="width:100%">+ הוסף תמונות</button>
+    </div>
+  </div>`);
+}
+function addPhotos(propId){
+  var fileEl=document.getElementById('phf');
+  var year=document.getElementById('phy')?.value||String(new Date().getFullYear());
+  var caption=document.getElementById('phc')?.value||'';
+  if(!fileEl||!fileEl.files||!fileEl.files.length){alert('בחר קובץ');return;}
+  if(!S.photos[propId])S.photos[propId]=[];
+  var files=Array.from(fileEl.files);
+  var loaded=0,total=files.length;
+  files.forEach(function(file){
+    var r=new FileReader();
+    r.onload=function(ev){
+      var raw=ev.target.result;
+      // Compress images before saving (max 800px, 70% quality)
+      compressImage(raw,800,0.7,function(compressed){
+        S.photos[propId].push({data:compressed,year:year,caption:caption});
+        if(++loaded===total){
+          var ok=safeLocalSave('photos',S.photos);
+          if(!ok){
+            alert('האחסון מלא – התמונות נשמרו זמנית. מומלץ לעשות גיבוי ולמחוק תמונות ישנות.');
+          }
+          openPhotos(propId);
+        }
+      });
+    };
+    r.readAsDataURL(file);
+  });
+}
+function delPhoto(propId,idx){
+  if(!confirm("למחוק תמונה זו?"))return;
+  S.photos[propId].splice(idx,1);
+  saveAll();openPhotos(propId);
+}
+
+// ─── WHATSAPP SHARE ───────────────────────────────────────────────────────
+function shareModal(propId){
+  var p=S.props.find(function(x){return x.id===propId;});if(!p)return;
+  var photos=S.photos[propId]||[];
+  var exParts=[];
+  if(p.parking) exParts.push('חניה');
+  if(p.balcony) exParts.push('מרפסת'+(p.balconySize>0?' '+p.balconySize+'מר':''));
+  if(p.vaad>0) exParts.push('ועד '+fmt(p.vaad)+'/חודש');
+  var ex=exParts.join(' | ');
+  var addrLine=p.address+(p.unit?' - '+p.unit:'');
+  var msg='נכס להשכרה - Homepic\n\n'
+    +'כתובת: '+addrLine+', '+p.city+'\n'
+    +p.type+(p.rooms>0?' '+p.rooms+' חדרים':'')+(p.floor>0?' קומה '+p.floor:'')+(p.size>0?' '+p.size+'מר':'')+' \n'
+    +'שכירות: '+fmt(p.rent)+'/חודש\n'
+    +(ex?ex+'\n':'')
+    +(p.notes?p.notes+'\n':'')
+    +'\nרועי כהן | Homepic נכסים';
+  window._sm=msg;
+  var pholHtml='';
+  if(photos.length>0){
+    pholHtml='<div style="margin-bottom:14px">';
+    photos.forEach(function(ph,i){
+      pholHtml+='<div style="display:inline-block;text-align:center;margin:4px"><img src="'+ph.data+'" style="width:85px;height:60px;object-fit:cover;border-radius:6px;border:1px solid #E2E8F0"><br><a href="'+ph.data+'" download="photo'+i+'.jpg" style="font-size:10px;color:#1D6FA4">הורד</a></div>';
+    });
+    pholHtml+='</div>';
+  }
+  var html='<div style="background:#F0FDF4;border:1px solid #BBF7D0;border-radius:10px;padding:14px;margin-bottom:14px;white-space:pre-line;font-size:13px;line-height:1.7">'+msg.replace(/&/g,'&amp;').replace(/</g,'&lt;')+'</div>'
+    +pholHtml
+    +'<div style="display:flex;gap:8px">'
+    +'<a href="https://wa.me/?text='+encodeURIComponent(msg)+'" target="_blank" class="btn green" style="flex:2;text-align:center">WhatsApp</a>'
+    +'<button onclick="copyShare()" class="btn gy" style="flex:1">העתק</button>'
+    +'</div>';
+  openM('שתף - '+p.address,html);
+}
+function copyShare(){var t=document.createElement('textarea');t.value=window._sm||'';document.body.appendChild(t);t.select();document.execCommand('copy');document.body.removeChild(t);alert('הועתק!');}
+
+function rAlerts(){
+  const all=getAlerts();const crit=all.filter(a=>a.type==="קריטי");
+  return `<div style="display:flex;gap:14px;margin-bottom:20px;flex-wrap:wrap">
+    <div class="stat" style="border-top:3px solid #EF4444"><div style="font-size:10px;color:#94A3B8;font-weight:700;text-transform:uppercase;margin-bottom:4px">קריטי</div><div style="font-size:22px;font-weight:800">${crit.length}</div></div>
+    <div class="stat" style="border-top:3px solid #F59E0B"><div style="font-size:10px;color:#94A3B8;font-weight:700;text-transform:uppercase;margin-bottom:4px">אזהרות</div><div style="font-size:22px;font-weight:800">${all.filter(a=>a.type==="אזהרה").length}</div></div>
+    <div class="stat" style="border-top:3px solid #8B5CF6"><div style="font-size:10px;color:#94A3B8;font-weight:700;text-transform:uppercase;margin-bottom:4px">חוזים ב-90 יום</div><div style="font-size:22px;font-weight:800">${S.props.filter(p=>{const d=dd(p.contractEnd);return d!==null&&d>=0&&d<=90}).length}</div></div>
+  </div>
+  <div class="card" style="margin-bottom:18px"><div style="font-weight:700;margin-bottom:16px;font-size:14px">ציר זמן חוזים</div>
+    ${S.props.filter(p=>p.contractEnd&&p.status==="מושכר").sort((a,b)=>new Date(a.contractEnd)-new Date(b.contractEnd)).map(p=>{const d=dd(p.contractEnd);const col=d<0?"#DC2626":d<=30?"#DC2626":d<=90?"#D97706":"#10B981";const pct=Math.min(100,Math.max(3,(365-d)/365*100));return`<div style="display:flex;align-items:center;gap:12px;padding:9px 14px;margin-bottom:6px;border-radius:10px;background:#F8FAFC;border-right:4px solid ${col}"><div style="width:140px;flex-shrink:0"><button onclick="viewProp(${p.id})" style="background:none;border:none;cursor:pointer;font-size:13px;font-weight:600;color:#1D6FA4;text-align:right;font-family:Heebo,sans-serif;padding:0">${p.address}</button><div style="font-size:10px;color:#94A3B8">${p.tenant}</div></div><div style="flex:1;background:#E2E8F0;border-radius:4px;height:7px;overflow:hidden"><div style="width:${pct}%;background:${col};height:100%"></div></div><div style="font-size:12px;font-weight:700;color:${col};width:110px;text-align:center">${d<0?`פג לפני ${Math.abs(d)} ימים`:`${d} ימים`}</div><div style="font-size:10px;color:#94A3B8;width:80px;text-align:center">${p.contractEnd}</div></div>`;}).join("")}
+  </div>
+  <div class="card"><div style="font-weight:700;margin-bottom:14px;font-size:14px">כל ההתראות</div>
+    ${all.length===0?`<div style="text-align:center;color:#94A3B8;padding:24px">אין התראות ✅</div>`:""}
+    ${all.map(a=>`<div style="display:flex;align-items:center;gap:12px;padding:12px 14px;margin-bottom:8px;border-radius:10px;background:${a.type==="קריטי"?"#FEF2F2":"#FFFBEB"};border:1px solid ${a.type==="קריטי"?"#FECACA":"#FDE68A"}"><span style="font-size:20px">${a.icon}</span><div style="flex:1;font-size:13px;font-weight:600;color:${a.type==="קריטי"?"#991B1B":"#92400E"}">${a.text}</div><span class="badge ${a.type==="קריטי"?"br":"by"}">${a.type}</span></div>`).join("")}
+  </div>`;
+}
+
+// ─── LEADS ───────────────────────────────────────────────────────────────
+function leadForm(l){const v=l||{name:"",phone:"",source:"אתר",budget:"",area:"",status:"חדש",notes:""};const isNew=!l;
+  return`<div><div class="sec"><div class="sec-lbl">פרטי ליד</div><div style="display:flex;flex-wrap:wrap;gap:10px">${fg("שם","lf_n","text",v.name)}${fg("טלפון","lf_p","text",v.phone)}${fg("תקציב","lf_b","text",v.budget,"placeholder='5,000-8,000'")}${fg("אזור","lf_a","text",v.area)}${fsel("מקור","lf_s",["אתר","יד2","המלצה","פייסבוק","גוגל","אחר"],v.source||"אתר")}${fsel("סטטוס","lf_st",["חדש","בטיפול","פגישה נקבעה","סגור"],v.status||"חדש")}</div></div>
+  <div class="sec"><div class="sec-lbl">הערות</div><div class="fg"><label>הערות</label><textarea id="lf_nt" rows="3" style="resize:vertical">${v.notes||""}</textarea></div></div>
+  <div style="display:flex;gap:8px"><button class="btn green" onclick="saveLead(${isNew?-1:v.id})" style="flex:2">✓ שמור</button><button class="btn gray" onclick="closeM()" style="flex:1">ביטול</button></div></div>`;
+}
+function saveLead(id){const v={name:gv("lf_n"),phone:gv("lf_p"),source:gv("lf_s"),budget:gv("lf_b"),area:gv("lf_a"),status:gv("lf_st"),notes:gv("lf_nt"),date:new Date().toLocaleDateString("he-IL")};
+  if(id===-1)S.leads.unshift({...v,id:Date.now()});else{const i=S.leads.findIndex(l=>l.id===id);if(i>-1)S.leads[i]={...S.leads[i],...v};}
+  saveAll();closeM();render();}
+function mvLead(id,d){const STAGES=["חדש","בטיפול","פגישה נקבעה","סגור"];const l=S.leads.find(x=>x.id===id);if(!l)return;const i=STAGES.indexOf(l.status);const nx=STAGES[i+d];if(nx){l.status=nx;saveAll();render();}}
+function dlLead(id){S.leads=S.leads.filter(l=>l.id!==id);saveAll();render();}
+function addLead(){addLead();}
+function editLead(id){var l=S.leads.find(function(x){return x.id===id;});if(l)openM('עריכת ליד',leadForm(l));}
+
+function rLeads(){
+  const STAGES=["חדש","בטיפול","פגישה נקבעה","סגור"];const SC={"חדש":"#1D6FA4","בטיפול":"#F59E0B","פגישה נקבעה":"#8B5CF6","סגור":"#10B981"};
+  return`<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px"><div style="display:flex;gap:14px">${STAGES.map(s=>`<div style="font-size:13px;font-weight:600;color:${SC[s]}">${s} (${S.leads.filter(l=>l.status===s).length})</div>`).join("")}</div><button class="btn blue" onclick="addLead()">+ ליד חדש</button></div>
+  <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px;align-items:start">
+  ${STAGES.map(stage=>{const items=S.leads.filter(l=>l.status===stage);return`<div><div style="background:${SC[stage]};color:#fff;border-radius:10px 10px 0 0;padding:8px 12px;font-size:13px;font-weight:700">${stage} · ${items.length}</div><div style="background:#fff;border-radius:0 0 10px 10px;box-shadow:0 2px 8px rgba(0,0,0,.08);min-height:140px">${items.map(l=>`<div style="padding:10px 12px;border-bottom:1px solid #F1F5F9"><div style="font-weight:700;font-size:13px;margin-bottom:2px">${l.name}</div><div style="font-size:11px;color:#94A3B8;margin-bottom:2px">${l.phone}</div><div style="font-size:11px;color:#64748B;margin-bottom:7px">${l.budget||""}</div><div style="display:flex;gap:4px;flex-wrap:wrap"><button class="sm" style="background:#EFF6FF;color:#1D6FA4" onclick='openM("עריכה",leadForm(S.leads.find(x=>x.id===${l.id})))'>✏️</button>${stage!=="חדש"?`<button class="sm" onclick="mvLead(${l.id},-1)">←</button>`:""}<button class="sm" style="background:#FEF2F2;color:#991B1B" onclick="dlLead(${l.id})">🗑</button>${stage!=="סגור"?`<button class="sm" style="color:${SC[STAGES[STAGES.indexOf(stage)+1]]};border-color:${SC[STAGES[STAGES.indexOf(stage)+1]]}" onclick="mvLead(${l.id},1)">→</button>`:""}</div></div>`).join("")}</div></div>`;}).join("")}
+  </div>`;
+}
+
+// ─── PAYMENTS ────────────────────────────────────────────────────────────
+function payForm(p){const v=p||{address:"",tenant:"",amount:"",month:"",status:"ממתין",date:"-"};const isNew=!p;
+  return`<div><div class="sec"><div class="sec-lbl">פרטי תשלום</div><div style="display:flex;flex-wrap:wrap;gap:10px">${fg("כתובת","pyf_a","text",v.address)}${fg("שוכר","pyf_t","text",v.tenant)}${fg("סכום ₪","pyf_s","number",v.amount)}${fg("חודש","pyf_m","text",v.month,"placeholder='מאי 2025'")}${fsel("סטטוס","pyf_st",["שולם","ממתין","באיחור"],v.status||"ממתין")}${fg("תאריך","pyf_d","text",v.date,"placeholder='01/05/25'")}</div></div>
+  <div style="display:flex;gap:8px"><button class="btn green" onclick="savePay(${isNew?-1:v.id})" style="flex:2">✓ שמור</button><button class="btn gray" onclick="closeM()" style="flex:1">ביטול</button></div></div>`;
+}
+
+
+function getPropById(id){return S.props.find(function(p){return p.id===id;});}
+function propSelectHtml(selectedId){
+  var o='<option value="">-- בחר נכס --</option>';
+  S.props.forEach(function(p){
+    var lbl=p.address+(p.unit?' – '+p.unit:'');
+    o+='<option value="'+p.id+'"'+(p.id===selectedId?' selected':'')+'>'+lbl+'</option>';
+  });
+  return o;
+}
+function onPayPropChange(){
+  var pid=+gv('payf_pid')||0;var p=getPropById(pid);if(!p)return;
+  se('payf_addr',p.address+(p.unit?' – '+p.unit:''));
+  se('payf_owner',p.owner||'');se('payf_ophone',p.ownerPhone||'');
+  se('payf_tenant',p.tenant&&p.tenant!=='-'?p.tenant:'');
+  if(!gv('payf_amount')&&p.rent) se('payf_amount',String(p.rent));
+}
+function onPayTypeChange(){
+  var t=gv('payf_type');
+  var s1=document.getElementById('pay_so');var s2=document.getElementById('pay_an');
+  if(s1)s1.style.display=t==='הוראת קבע'?'':'none';
+  if(s2)s2.style.display=t!=='הוראת קבע'?'':'none';
+}
+function onMgmtProp(){
+  var pid=+gv('mf_pid')||0;var p=getPropById(pid);if(!p)return;
+  se('mf_addr',p.address+(p.unit?' – '+p.unit:''));
+  se('mf_owner',p.owner||'');se('mf_ophone',p.ownerPhone||'');
+}
+function onMgmtType(){
+  var t=gv('mf_type');
+  var s1=document.getElementById('mf_so');var s2=document.getElementById('mf_an');
+  if(s1)s1.style.display=t==='הוראת קבע'?'':'none';
+  if(s2)s2.style.display=t!=='הוראת קבע'?'':'none';
+}
+
+function payFormHtml(pay){
+  var v=pay||{propId:null,address:'',owner:'',ownerPhone:'',tenant:'',
+    payType:'הוראת קבע',desc:'תשלום',amount:'',month:'',
+    periodStart:'',periodEnd:'',status:'ממתין',date:'-',invoiceIssued:false,isActive:true};
+  var isNew=!pay; var isSO=(v.payType==='הוראת קבע');
+  var iS='font-size:13px;padding:7px 10px;border-radius:8px;border:1px solid #E2E8F0;width:100%;direction:rtl;outline:none';
+  var rS='font-size:13px;padding:7px 10px;border-radius:8px;border:1px solid #E2E8F0;width:100%;background:#F8FAFC;color:#64748B';
+  var h='<div>';
+  h+='<div class="sc"><div class="sc-t">שיוך לנכס</div>';
+  h+='<div class="fi" style="margin-bottom:10px"><label>בחר נכס</label>';
+  h+='<select id="payf_pid" onchange="onPayPropChange()" style="'+iS+'">'+propSelectHtml(v.propId)+'</select></div>';
+  h+='<div style="display:flex;flex-wrap:wrap;gap:10px">';
+  h+='<div class="fi" style="flex:2"><label>כתובת</label><input id="payf_addr" value="'+String(v.address||'').replace(/"/g,'&quot;')+'" readonly style="'+rS+'"></div>';
+  h+='<div class="fi"><label>בעלים</label><input id="payf_owner" value="'+String(v.owner||'').replace(/"/g,'&quot;')+'" readonly style="'+rS+'"></div>';
+  h+='<div class="fi"><label>שוכר</label><input id="payf_tenant" value="'+String(v.tenant||'').replace(/"/g,'&quot;')+'" readonly style="'+rS+'"></div>';
+  h+='</div></div>';
+  h+='<div class="sc"><div class="sc-t">סוג תשלום</div><div style="display:flex;flex-wrap:wrap;gap:10px">';
+  h+='<div class="fi"><label>סוג</label><select id="payf_type" onchange="onPayTypeChange()" style="'+iS+'">';
+  h+='<option'+(isSO?' selected':'')+'>הוראת קבע</option>';
+  h+='<option'+(v.payType==='שנתי'?' selected':'')+'>שנתי</option>';
+  h+='<option'+(v.payType==='חד-פעמי'?' selected':'')+'>חד-פעמי</option>';
+  h+='</select></div>';
+  h+='<div class="fi"><label>תיאור</label><input id="payf_desc" type="text" value="'+String(v.desc||'').replace(/"/g,'&quot;')+'" style="'+iS+'"></div>';
+  h+='<div class="fi" style="max-width:130px"><label>סכום ₪</label><input id="payf_amount" type="number" value="'+String(v.amount||'')+'" style="'+iS+'"></div>';
+  h+='</div></div>';
+  h+='<div id="pay_so" class="sc" style="display:'+(isSO?'':'none')+'">';
+  h+='<div class="sc-t">הוראת קבע חודשית</div>';
+  h+='<div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center">';
+  h+='<div class="fi"><label>חודש</label><input id="payf_month" type="text" value="'+String(v.month||'').replace(/"/g,'&quot;')+'" placeholder="מאי 2025" style="'+iS+'"></div>';
+  h+='<div style="display:flex;align-items:center;gap:7px;padding-top:18px">';
+  h+='<input type="checkbox" id="payf_active"'+(v.isActive!==false?' checked':'')+' style="width:16px;height:16px;accent-color:#1D6FA4">';
+  h+='<label for="payf_active" style="font-size:13px;font-weight:500;cursor:pointer">פעילה</label></div>';
+  h+='</div></div>';
+  h+='<div id="pay_an" class="sc" style="display:'+(!isSO?'':'none')+'">';
+  h+='<div class="sc-t">תקופה ותאריכים</div><div style="display:flex;flex-wrap:wrap;gap:10px">';
+  h+='<div class="fi"><label>תחילת תקופה</label><input id="payf_pstart" type="date" value="'+String(v.periodStart||'')+'" style="'+iS+'"></div>';
+  h+='<div class="fi"><label>סיום תקופה</label><input id="payf_pend" type="date" value="'+String(v.periodEnd||'')+'" style="'+iS+'"></div>';
+  h+='<div class="fi"><label>תאריך תשלום</label><input id="payf_pdate" type="date" style="'+iS+'"></div>';
+  h+='</div></div>';
+  h+='<div class="sc"><div class="sc-t">סטאטוס</div>';
+  h+='<div style="display:flex;flex-wrap:wrap;gap:10px;margin-bottom:10px">';
+  h+='<div class="fi"><label>סטאטוס</label><select id="payf_status" style="'+iS+'">';
+  h+='<option'+(v.status==='שולם'?' selected':'')+'>שולם</option>';
+  h+='<option'+(v.status==='ממתין'?' selected':'')+'>ממתין</option>';
+  h+='<option'+(v.status==='באיחור'?' selected':'')+'>באיחור</option>';
+  h+='</select></div>';
+  h+='<div class="fi"><label>תאריך ביצוע</label><input id="payf_date" type="text" value="'+String(v.date||'').replace(/"/g,'&quot;')+'" placeholder="01/05/25" style="'+iS+'"></div>';
+  h+='</div>';
+  h+='<div style="display:flex;align-items:center;gap:7px"><input type="checkbox" id="payf_inv"'+(v.invoiceIssued?' checked':'')+' style="width:16px;height:16px;accent-color:#1D6FA4">';
+  h+='<label for="payf_inv" style="font-size:13px;font-weight:500;cursor:pointer">חשבונית הונפקה</label></div></div>';
+  h+='<div style="display:flex;gap:8px"><button class="btn gr" onclick="savePay('+(isNew?-1:v.id)+')" style="flex:2">✓ שמור</button>';
+  h+='<button class="btn gy" onclick="closeM()" style="flex:1">ביטול</button></div></div>';
+  return h;
+}
+
+function savePay(id){const v={address:gv("pyf_a"),tenant:gv("pyf_t"),amount:+gv("pyf_s")||0,month:gv("pyf_m"),status:gv("pyf_st"),date:gv("pyf_d")||"-"};
+  if(id===-1)S.pays.unshift({...v,id:Date.now()});else{const i=S.pays.findIndex(p=>p.id===id);if(i>-1)S.pays[i]={...S.pays[i],...v};}
+  saveAll();closeM();render();}
+function markPaid(id){const p=S.pays.find(x=>x.id===id);if(p){p.status="שולם";p.date=new Date().toLocaleDateString("he-IL");saveAll();render();}}
+function dlPay(id){S.pays=S.pays.filter(p=>p.id!==id);saveAll();render();}
+function rPays(){
+  const col=S.pays.filter(p=>p.status==="שולם").reduce((s,p)=>s+p.amount,0);
+  const pen=S.pays.filter(p=>p.status!=="שולם").reduce((s,p)=>s+p.amount,0);
+  return`<div style="display:flex;gap:14px;margin-bottom:16px;flex-wrap:wrap;align-items:center">
+    <div class="stat" style="border-top:3px solid #10B981"><div style="font-size:10px;color:#94A3B8;font-weight:700;text-transform:uppercase;margin-bottom:4px">נגבה</div><div style="font-size:22px;font-weight:800">${fmt(col)}</div></div>
+    <div class="stat" style="border-top:3px solid #F59E0B"><div style="font-size:10px;color:#94A3B8;font-weight:700;text-transform:uppercase;margin-bottom:4px">ממתין</div><div style="font-size:22px;font-weight:800">${fmt(pen)}</div></div>
+    <div class="stat" style="border-top:3px solid #1D6FA4"><div style="font-size:10px;color:#94A3B8;font-weight:700;text-transform:uppercase;margin-bottom:4px">עסקאות</div><div style="font-size:22px;font-weight:800">${S.pays.length}</div></div>
+    <div style="flex:1"></div>
+    <button class="btn blue" onclick="openM('תשלום חדש',payForm(null))">+ תשלום חדש</button>
+  </div>
+  <div style="background:#fff;border-radius:14px;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,.08)">
+  <table class="T"><thead><tr><th>כתובת</th><th>שוכר</th><th>חודש</th><th>סכום</th><th>תאריך</th><th>סטטוס</th><th></th></tr></thead><tbody>
+  ${S.pays.map((p,i)=>{const sc=p.status==="שולם"?"bg":p.status==="ממתין"?"by":"br";
+    return`<tr style="background:${i%2===0?"#fff":"#FAFBFF"}"><td style="font-weight:600">${p.address}</td><td style="color:#64748B">${p.tenant}</td><td style="color:#64748B">${p.month}</td><td style="font-weight:700;color:#1D6FA4">${fmt(p.amount)}</td><td style="color:${p.date==="-"?"#94A3B8":"#0F172A"}">${p.date}</td><td><span class="badge ${sc}">${p.status}</span></td>
+    <td><div style="display:flex;gap:4px">${p.status!=="שולם"?`<button class="sm" style="background:#D1FAE5;color:#065F46" onclick="markPaid(${p.id})">✓</button>`:""}<button class="sm" style="background:#EFF6FF;color:#1D6FA4" onclick='openM("עריכת תשלום",payForm(S.pays.find(x=>x.id===${p.id})))'>✏️</button><button class="sm" style="background:#FEF2F2;color:#991B1B" onclick="dlPay(${p.id})">🗑</button></div></td></tr>`;
+  }).join("")}
+  </tbody></table></div>`;
+}
+
+// ─── DEPOSITS ────────────────────────────────────────────────────────────
+function togDep(id,f){const p=S.props.find(x=>x.id===id);if(p){p[f]=!p[f];saveAll();render();}}
+function rDeps(){
+  const r=S.props.filter(p=>p.status==="מושכר");
+  const total=r.reduce((s,p)=>s+Number(p.deposit||0),0);
+  const paid=r.filter(p=>p.depositPaid).reduce((s,p)=>s+Number(p.deposit||0),0);
+  return`<div style="display:flex;gap:14px;margin-bottom:16px;flex-wrap:wrap">
+    <div class="stat" style="border-top:3px solid #1D6FA4"><div style="font-size:10px;color:#94A3B8;font-weight:700;text-transform:uppercase;margin-bottom:4px">סה"כ פיקדונות</div><div style="font-size:22px;font-weight:800">${fmt(total)}</div></div>
+    <div class="stat" style="border-top:3px solid #10B981"><div style="font-size:10px;color:#94A3B8;font-weight:700;text-transform:uppercase;margin-bottom:4px">שולמו</div><div style="font-size:22px;font-weight:800">${fmt(paid)}</div></div>
+    <div class="stat" style="border-top:3px solid #EF4444"><div style="font-size:10px;color:#94A3B8;font-weight:700;text-transform:uppercase;margin-bottom:4px">חסרים</div><div style="font-size:22px;font-weight:800">${fmt(total-paid)}</div></div>
+  </div>
+  <div style="background:#fff;border-radius:14px;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,.08)">
+  <table class="T"><thead><tr><th>כתובת</th><th>שוכר</th><th>פיקדון</th><th>סוג</th><th>חוזה עד</th><th>שולם</th><th>הוחזר</th></tr></thead><tbody>
+  ${r.map((p,i)=>`<tr style="background:${i%2===0?"#fff":"#FAFBFF"}"><td><button onclick="viewProp(${p.id})" style="background:none;border:none;cursor:pointer;font-size:13px;font-weight:600;color:#1D6FA4;text-decoration:underline;text-underline-offset:2px;font-family:Heebo,sans-serif;padding:0">${p.address}</button></td>
+    <td style="color:#64748B">${p.tenant}</td>
+    <td style="font-weight:700;color:#1D6FA4">${p.deposit>0?fmt(p.deposit):"—"}</td>
+    <td style="font-size:11px;color:#64748B">${p.depositType||"מזומן"}</td>
+    <td style="font-size:11px;color:#64748B">${p.contractEnd||"—"}</td>
+    <td><button class="btn ${p.depositPaid?"green":"red"}" onclick="togDep(${p.id},'depositPaid')" style="font-size:12px;padding:4px 10px">${p.depositPaid?"✓ שולם":"✗ חסר"}</button></td>
+    <td><button class="btn gray" onclick="togDep(${p.id},'depositReturned')" style="font-size:12px;padding:4px 10px;${p.depositReturned?"color:#1E40AF":""}">${p.depositReturned?"✓ הוחזר":"טרם"}</button></td>
+  </tr>`).join("")}
+  </tbody></table></div>`;
+}
+function togDepPaid(id){togDep(id,"depositPaid");}
+function togDepRet(id){togDep(id,"depositReturned");}
+
+// ─── TASKS ────────────────────────────────────────────────────────────────
+function taskForm(t){const v=t||{title:"",due:"",priority:"בינונית",type:"כללי",related:""};const isNew=!t;
+  return`<div><div class="sec"><div class="sec-lbl">פרטי משימה</div><div style="display:flex;flex-wrap:wrap;gap:10px">${fg("כותרת","tf_t","text",v.title,"placeholder='תיאור המשימה...'")}${fg("תאריך","tf_d","date",v.due)}${fsel("עדיפות","tf_p",["גבוהה","בינונית","נמוכה"],v.priority||"בינונית")}${fsel("סוג","tf_y",["חוזה","תחזוקה","פגישה","כספי","שיווק","לקוח","כללי"],v.type||"כללי")}${fg("קשור ל","tf_r","text",v.related,"placeholder='נכס / שוכר...'")}  </div></div>
+  <div style="display:flex;gap:8px"><button class="btn green" onclick="saveTask(${isNew?-1:v.id})" style="flex:2">✓ שמור</button><button class="btn gray" onclick="closeM()" style="flex:1">ביטול</button></div></div>`;
+}
+function saveTask(id){const v={title:gv("tf_t"),due:gv("tf_d"),priority:gv("tf_p"),type:gv("tf_y"),related:gv("tf_r")};if(!v.title)return;
+  if(id===-1)S.tasks.unshift({...v,id:Date.now(),done:false});else{const i=S.tasks.findIndex(t=>t.id===id);if(i>-1)S.tasks[i]={...S.tasks[i],...v};}
+  saveAll();closeM();render();}
+function togTask(id){const t=S.tasks.find(x=>x.id===id);if(t){t.done=!t.done;saveAll();render();}}
+function dlTask(id){S.tasks=S.tasks.filter(t=>t.id!==id);saveAll();render();}
+function addTask(){openM('משימה חדשה',taskForm(null));}
+function editTask(id){var t=S.tasks.find(function(x){return x.id===id;});if(t)openM('עריכת משימה',taskForm(t));}
+
+function rTasks(){
+  const TC={"חוזה":"#6366F1","תחזוקה":"#F59E0B","פגישה":"#8B5CF6","כספי":"#EF4444","שיווק":"#1D6FA4","לקוח":"#10B981","כללי":"#94A3B8"};
+  const open=S.tasks.filter(t=>!t.done),done=S.tasks.filter(t=>t.done);
+  return`<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px"><div style="font-size:13px;color:#64748B">פתוחות: <strong>${open.length}</strong> | הושלמו: <strong style="color:#10B981">${done.length}</strong></div><button class="btn blue" onclick="openM('משימה חדשה',taskForm(null))">+ משימה חדשה</button></div>
+  <div style="display:flex;flex-direction:column;gap:7px;margin-bottom:20px">
+  ${open.map(t=>{const pc=t.priority==="גבוהה"?"#991B1B":t.priority==="בינונית"?"#92400E":"#166534";const pb=t.priority==="גבוהה"?"#FEE2E2":t.priority==="בינונית"?"#FEF3C7":"#D1FAE5";
+    return`<div style="background:#fff;border-radius:12px;padding:12px 16px;display:flex;align-items:center;gap:12px;box-shadow:0 1px 3px rgba(0,0,0,.07)">
+      <input type="checkbox" onchange="togTask(${t.id})" style="width:17px;height:17px;cursor:pointer;accent-color:#1D6FA4;flex-shrink:0">
+      <div style="width:4px;height:32px;border-radius:2px;background:${TC[t.type]||"#94A3B8"};flex-shrink:0"></div>
+      <div style="flex:1"><div style="font-size:13px;font-weight:600">${t.title}</div><div style="font-size:10px;color:#94A3B8;margin-top:1px">${t.type}${t.related?" · "+t.related:""}</div></div>
+      <div style="font-size:11px;color:#94A3B8;white-space:nowrap">${t.due||""}</div>
+      <span style="background:${pb};color:${pc};border-radius:5px;padding:2px 8px;font-size:11px;font-weight:600;white-space:nowrap">${t.priority}</span>
+      <button class="sm" style="background:#EFF6FF;color:#1D6FA4" onclick='openM("עריכת משימה",taskForm(S.tasks.find(x=>x.id===${t.id})))'>✏️</button>
+      <button class="sm" style="background:#FEF2F2;color:#991B1B" onclick="dlTask(${t.id})">🗑</button>
+    </div>`;}).join("")}
+  </div>
+  ${done.length>0?`<div style="font-size:11px;color:#94A3B8;font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">הושלמו (${done.length})</div>
+  <div style="display:flex;flex-direction:column;gap:6px">${done.map(t=>`<div style="background:#fff;border-radius:10px;padding:10px 14px;display:flex;align-items:center;gap:12px;opacity:.5"><input type="checkbox" checked onchange="togTask(${t.id})" style="width:16px;height:16px;cursor:pointer;accent-color:#10B981;flex-shrink:0"><div style="flex:1;font-size:13px;color:#64748B;text-decoration:line-through">${t.title}</div><button class="sm" style="background:#FEF2F2;color:#991B1B" onclick="dlTask(${t.id})">🗑</button></div>`).join("")}</div>`:""}`;
+}
+
+// ─── EXPENSES ────────────────────────────────────────────────────────────
+let expPropId=null;
+function expForm(e,pid){
+  const v=e||{propId:pid||null,vendor:"",type:"תחזוקה",amount:"",date:"",desc:"",paymentMethod:"ביט",invoiceReceived:false};const isNew=!e;
+  return`<div><div class="sec"><div class="sec-lbl">שיוך לנכס</div><div class="fg"><label>נכס</label><select id="ef_pid"><option value="">-- בחר נכס --</option>${S.props.map(p=>`<option value="${p.id}"${v.propId===p.id?" selected":""}>${p.address}</option>`).join("")}</select></div></div>
+  <div class="sec"><div class="sec-lbl">פרטי ההוצאה</div><div style="display:flex;flex-wrap:wrap;gap:10px">${fg("ספק / איש מקצוע","ef_v","text",v.vendor)}${fsel("סוג","ef_t",["תחזוקה","אינסטלציה","חשמל","צביעה","נגרות","מיזוג","ניהול","ביטוח","ארנונה","ועד בית","אחר"],v.type||"תחזוקה")}${fg("סכום ₪","ef_a","number",v.amount)}${fg("תאריך","ef_d","date",v.date)}${fg("תיאור","ef_dc","text",v.desc,"placeholder='תיאור קצר...'")}  </div></div>
+  <div class="sec"><div class="sec-lbl">אמצעי תשלום וחשבונית</div>
+    <div style="display:flex;flex-wrap:wrap;gap:10px;margin-bottom:10px">${fsel("אמצעי תשלום","ef_pm",["ביט","העברה בנקאית","מזומן","צ'ק","כרטיס אשראי","לא שולם"],v.paymentMethod||"ביט")}</div>
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px"><input type="checkbox" id="ef_inv"${v.invoiceReceived?" checked":""} style="width:16px;height:16px;accent-color:#1D6FA4"><label for="ef_inv" style="font-size:13px;cursor:pointer;font-weight:500">✅ חשבונית התקבלה</label></div>
+    <div class="fg"><label>העלאת חשבונית</label><input type="file" id="ef_file" accept="image/*,.pdf" style="font-size:12px;padding:6px;border:1px dashed #E2E8F0;border-radius:8px;background:#F8FAFC">${v.invoiceData?`<div style="font-size:11px;color:#059669;margin-top:4px">✓ חשבונית קיימת</div>`:""}</div>
+  </div>
+  <div style="display:flex;gap:8px"><button class="btn green" onclick="saveExp(${isNew?-1:v.id})" style="flex:2">✓ שמור הוצאה</button><button class="btn gray" onclick="closeM()" style="flex:1">ביטול</button></div></div>`;
+}
+function saveExp(id){
+  const pid=+gv("ef_pid")||null;const prop=pid?S.props.find(p=>p.id===pid):null;
+  const base={propId:pid,address:prop?prop.address:"",vendor:gv("ef_v"),type:gv("ef_t"),amount:+gv("ef_a")||0,date:gv("ef_d"),desc:gv("ef_dc"),paymentMethod:gv("ef_pm"),invoiceReceived:gc("ef_inv")};
+  const file=document.getElementById("ef_file");
+  if(file&&file.files&&file.files[0]){
+    const r=new FileReader();r.onload=ev=>{commitExp(id,{...base,invoiceData:ev.target.result});};r.readAsDataURL(file.files[0]);
+  }else{const ex=id!==-1?S.expenses.find(e=>e.id===id):null;commitExp(id,{...base,invoiceData:ex?ex.invoiceData:null});}
+}
+function commitExp(id,vals){
+  if(id===-1)S.expenses.unshift({...vals,id:Date.now()});
+  else{const i=S.expenses.findIndex(e=>e.id===id);if(i>-1)S.expenses[i]={...S.expenses[i],...vals};}
+  saveAll();closeM();render();
+}
+function dlExp(id){S.expenses=S.expenses.filter(e=>e.id!==id);saveAll();render();}
+function viewInvoice(id){const e=S.expenses.find(x=>x.id===id);if(!e||!e.invoiceData)return;const w=window.open("","_blank");w.document.write(`<html><body style="margin:0"><${e.invoiceData.startsWith("data:image")?"img src":"embed src"}="${e.invoiceData}"${e.invoiceData.startsWith("data:image")?' style="max-width:100%;max-height:100vh"':" width='100%' height='100vh' type='application/pdf'"}><\/body><\/html>`);w.document.close();}
+
+function printQReport(propId){
+  const p=S.props.find(x=>x.id===propId);if(!p)return;
+  const pays=S.pays.filter(x=>x.address===p.address&&x.status==="שולם");
+  const exps=S.expenses.filter(x=>x.propId===propId);
+  const inc=pays.reduce((s,x)=>s+x.amount,0);const exp=exps.reduce((s,x)=>s+Number(x.amount),0);const net=inc-exp;
+  const now=new Date();const q="Q"+Math.ceil((now.getMonth()+1)/3)+"-"+now.getFullYear();
+  const w=window.open("","_blank");
+  w.document.write(`<!DOCTYPE html><html dir="rtl"><head><meta charset="UTF-8"><style>body{font-family:Arial,sans-serif;padding:36px;direction:rtl;color:#0F172A}h1{border-bottom:3px solid #1D6FA4;padding-bottom:8px;font-size:20px}h2{color:#1D6FA4;font-size:15px;margin-top:24px}table{width:100%;border-collapse:collapse;margin-top:8px}th,td{border:1px solid #E2E8F0;padding:8px 12px;text-align:right;font-size:12px}th{background:#F8FAFC;font-weight:700}.meta{font-size:12px;color:#64748B;margin:8px 0 20px}.box{display:inline-block;border:1px solid #E2E8F0;border-radius:8px;padding:12px 20px;margin:4px;text-align:center}.lbl{font-size:10px;color:#94A3B8;font-weight:700;text-transform:uppercase}.val{font-size:20px;font-weight:800}.g{color:#059669}.r{color:#DC2626}</style></head><body>
+  <h1>דוח רבעוני – ${p.address}</h1>
+  <div class="meta"><strong>שוכר:</strong> ${p.tenant} &nbsp;|&nbsp; <strong>בעלים:</strong> ${p.owner} &nbsp;|&nbsp; <strong>שכ"ד:</strong> ${fmt(p.rent)}/חודש &nbsp;|&nbsp; <strong>חוזה עד:</strong> ${p.contractEnd||"—"} &nbsp;|&nbsp; <strong>פיקדון:</strong> ${p.deposit>0?fmt(p.deposit)+"("+p.depositType+")":"—"} &nbsp;|&nbsp; <strong>רבעון:</strong> ${q} &nbsp;|&nbsp; <strong>הופק:</strong> ${now.toLocaleDateString("he-IL")}</div>
+  <div><div class="box"><div class="lbl">הכנסות שכ"ד</div><div class="val g">${fmt(inc)}</div></div><div class="box"><div class="lbl">הוצאות</div><div class="val r">${fmt(exp)}</div></div><div class="box"><div class="lbl">רווח נקי</div><div class="val ${net>=0?"g":"r"}">${fmt(net)}</div></div><div class="box"><div class="lbl">ועד בית</div><div class="val">${p.vaad>0?fmt(p.vaad*3):"—"}</div></div></div>
+  <h2>תשלומי שכ"ד</h2><table><thead><tr><th>חודש</th><th>סכום</th><th>תאריך</th></tr></thead><tbody>${pays.length>0?pays.map(x=>`<tr><td>${x.month}</td><td>${fmt(x.amount)}</td><td>${x.date}</td></tr>`).join(""):"<tr><td colspan='3'>אין תשלומים</td></tr>"}</tbody></table>
+  <h2>הוצאות</h2><table><thead><tr><th>תאריך</th><th>ספק</th><th>סוג</th><th>תיאור</th><th>אמצעי תשלום</th><th>חשבונית</th><th>סכום</th></tr></thead><tbody>${exps.length>0?exps.map(e=>`<tr><td>${e.date}</td><td>${e.vendor}</td><td>${e.type}</td><td>${e.desc||""}</td><td>${e.paymentMethod||"—"}</td><td>${e.invoiceReceived?"✓":"✗"}</td><td class="r">${fmt(e.amount)}</td></tr>`).join(""):"<tr><td colspan='7'>אין הוצאות</td></tr>"}</tbody></table>
+  <div style="margin-top:20px;padding:14px;background:#F8FAFC;border-radius:8px;text-align:center;font-size:16px;font-weight:700">רווח נקי: <span class="${net>=0?"g":"r"}">${fmt(net)}</span> &nbsp;|&nbsp; שכ"ד שנתי: ${fmt(p.rent*12)}</div>
+  </body></html>`);w.document.close();w.print();
+}
+
+
+function addMgmt(){openM("חוזה ניהול חדש",mgmtForm(null));}
+function editMgmt(id){var m=S.mgmt.find(function(x){return x.id===id;});openM("עריכת חוזה",mgmtForm(m));}
+function dlMgmt(id){if(!confirm("למחוק?"))return;S.mgmt=S.mgmt.filter(function(m){return m.id!==id;});saveAll();render();}
+function markMgmtPaid(id){var m=S.mgmt.find(function(x){return x.id===id;});if(m){m.lastPaid=new Date().toLocaleDateString("he-IL");saveAll();render();}}
+function toggleMgmtInv(id){var m=S.mgmt.find(function(x){return x.id===id;});if(m){m.invoiceIssued=!m.invoiceIssued;saveAll();render();}}
+function onMgmtProp(){var pid=+gv("mf_pid")||0;var p=getPropById(pid);if(!p)return;se("mf_addr",p.address+(p.unit?" – "+p.unit:""));se("mf_owner",p.owner||"");se("mf_ophone",p.ownerPhone||"");}
+function onMgmtType(){var t=gv("mf_type");var s1=document.getElementById("mf_so");var s2=document.getElementById("mf_an");if(s1)s1.style.display=t==="הוראת קבע"?"":"none";if(s2)s2.style.display=t!=="הוראת קבע"?"":"none";}
+
+function mgmtForm(m){
+  var v=m||{propId:null,address:"",owner:"",ownerPhone:"",feeType:"הוראת קבע",monthlyFee:"",annualFee:"",desc:"דמי ניהול",periodStart:"",periodEnd:"",status:"פעיל",lastPaid:"",invoiceIssued:false,notes:""};
+  var isNew=!m;var isSO=v.feeType==="הוראת קבע";
+  var iS="font-size:13px;padding:7px 10px;border-radius:8px;border:1px solid #E2E8F0;width:100%;direction:rtl;outline:none";
+  var rS="font-size:13px;padding:7px 10px;border-radius:8px;border:1px solid #E2E8F0;width:100%;background:#F8FAFC;color:#64748B";
+  var h="<div>";
+  h+="<div class='sc'><div class='sc-t'>נכס ובעלים</div>";
+  h+="<div class='fi' style='margin-bottom:10px'><label>בחר נכס</label><select id='mf_pid' onchange='onMgmtProp()' style='"+iS+"'>"+propSelectHtml(v.propId)+"</select></div>";
+  h+="<div style='display:flex;flex-wrap:wrap;gap:10px'>";
+  h+="<div class='fi' style='flex:2'><label>כתובת</label><input id='mf_addr' value='"+String(v.address||"").replace(/'/g,"&#39;")+"' readonly style='"+rS+"'></div>";
+  h+="<div class='fi'><label>בעלים</label><input id='mf_owner' value='"+String(v.owner||"").replace(/'/g,"&#39;")+"' readonly style='"+rS+"'></div>";
+  h+="<div class='fi'><label>טלפון</label><input id='mf_ophone' value='"+String(v.ownerPhone||"").replace(/'/g,"&#39;")+"' readonly style='"+rS+"'></div>";
+  h+="</div></div>";
+  h+="<div class='sc'><div class='sc-t'>פרטי חוזה</div>";
+  h+="<div style='display:flex;flex-wrap:wrap;gap:10px;margin-bottom:10px'>";
+  h+="<div class='fi'><label>סוג גבייה</label><select id='mf_type' onchange='onMgmtType()' style='"+iS+"'><option"+(isSO?" selected":"")+">הוראת קבע</option><option"+(v.feeType==="שנתי"?" selected":"")+">שנתי</option><option"+(v.feeType==="חד-פעמי"?" selected":"")+">חד-פעמי</option></select></div>";
+  h+="<div class='fi'><label>תיאור</label><input id='mf_desc' type='text' value='"+String(v.desc||"").replace(/'/g,"&#39;")+"' style='"+iS+"'></div>";
+  h+="<div class='fi'><label>סטאטוס</label><select id='mf_status' style='"+iS+"'><option"+(v.status==="פעיל"?" selected":"")+">פעיל</option><option"+(v.status==="מושהה"?" selected":"")+">מושהה</option><option"+(v.status==="בוטל"?" selected":"")+">בוטל</option></select></div>";
+  h+="</div>";
+  h+="<div style='display:flex;flex-wrap:wrap;gap:10px'>";
+  h+="<div class='fi'><label>תחילת תקופה</label><input id='mf_ps' type='date' value='"+String(v.periodStart||"")+"' style='"+iS+"'></div>";
+  h+="<div class='fi'><label>סיום תקופה</label><input id='mf_pe' type='date' value='"+String(v.periodEnd||"")+"' style='"+iS+"'></div>";
+  h+="</div></div>";
+  h+="<div id='mf_so' class='sc' style='display:"+(isSO?"":"none")+"'><div class='sc-t'>הוראת קבע</div>";
+  h+="<div class='fi' style='max-width:150px'><label>דמי ניהול חודשיים ₪</label><input id='mf_mfee' type='number' value='"+String(v.monthlyFee||"")+"' style='"+iS+"'></div></div>";
+  h+="<div id='mf_an' class='sc' style='display:"+(!isSO?"":"none")+"'><div class='sc-t'>תשלום שנתי/חד-פעמי</div>";
+  h+="<div style='display:flex;flex-wrap:wrap;gap:10px'><div class='fi' style='max-width:150px'><label>סכום ₪</label><input id='mf_afee' type='number' value='"+String(v.annualFee||"")+"' style='"+iS+"'></div>";
+  h+="<div class='fi'><label>תאריך תשלום</label><input id='mf_pd' type='date' value='"+String(v.lastPaid||"")+"' style='"+iS+"'></div></div></div>";
+  h+="<div class='sc'><div class='sc-t'>מעקב</div>";
+  h+="<div style='display:flex;flex-wrap:wrap;gap:10px;margin-bottom:10px'><div class='fi'><label>תשלום אחרון</label><input id='mf_lp' type='text' value='"+String(v.lastPaid||"").replace(/'/g,"&#39;")+"' placeholder='01/05/25' style='"+iS+"'></div></div>";
+  h+="<div style='display:flex;align-items:center;gap:7px'><input type='checkbox' id='mf_inv'"+(v.invoiceIssued?" checked":"")+" style='width:16px;height:16px;accent-color:#1D6FA4'><label for='mf_inv' style='font-size:13px;font-weight:500;cursor:pointer'>חשבונית הונפקה</label></div></div>";
+  h+="<div style='display:flex;gap:8px'><button class='btn gr' onclick='saveMgmt("+(isNew?-1:v.id)+")' style='flex:2'>✓ שמור</button><button class='btn gy' onclick='closeM()' style='flex:1'>ביטול</button></div></div>";
+  return h;
+}
+function saveMgmt(id){
+  var pid=+gv("mf_pid")||null;var prop=pid?getPropById(pid):null;
+  var isSO=gv("mf_type")==="הוראת קבע";
+  var v={propId:pid,address:prop?(prop.address+(prop.unit?" – "+prop.unit:"")):"",owner:prop?prop.owner:"",ownerPhone:prop?prop.ownerPhone:"",
+    feeType:gv("mf_type")||"הוראת קבע",monthlyFee:isSO?(+gv("mf_mfee")||0):0,
+    annualFee:!isSO?(+gv("mf_afee")||0):0,desc:gv("mf_desc")||"דמי ניהול",
+    periodStart:gv("mf_ps")||"",periodEnd:gv("mf_pe")||"",status:gv("mf_status")||"פעיל",
+    lastPaid:gv("mf_lp")||"",invoiceIssued:gc("mf_inv"),notes:""};
+  if(id===-1)S.mgmt.unshift(Object.assign({id:Date.now()},v));
+  else{var i=S.mgmt.findIndex(function(x){return x.id===id;});if(i>-1)S.mgmt[i]=Object.assign({},S.mgmt[i],v);}
+  saveAll();closeM();render();
+}
+
+function rMgmt(){
+  var active=S.mgmt.filter(function(m){return m.status==="פעיל";});
+  var monthly=active.filter(function(m){return m.feeType==="הוראת קבע";}).reduce(function(s,m){return s+Number(m.monthlyFee);},0);
+  var noInv=S.mgmt.filter(function(m){return !m.invoiceIssued;}).length;
+  var h="<div style='display:flex;gap:12px;margin-bottom:16px;flex-wrap:wrap;align-items:center'>";
+  h+="<div class='sb' style='border-top:3px solid #1D6FA4'><div style='font-size:10px;color:#94A3B8;font-weight:700;text-transform:uppercase;margin-bottom:4px'>חוזים פעילים</div><div style='font-size:22px;font-weight:800'>"+active.length+"</div></div>";
+  h+="<div class='sb' style='border-top:3px solid #10B981'><div style='font-size:10px;color:#94A3B8;font-weight:700;text-transform:uppercase;margin-bottom:4px'>הכנסת ניהול חודשית</div><div style='font-size:22px;font-weight:800'>"+fmt(monthly)+"</div></div>";
+  h+="<div class='sb' style='border-top:3px solid #F59E0B'><div style='font-size:10px;color:#94A3B8;font-weight:700;text-transform:uppercase;margin-bottom:4px'>חשבוניות חסרות</div><div style='font-size:22px;font-weight:800'>"+noInv+"</div></div>";
+  h+="<div style='flex:1'></div><button onclick='addMgmt()' class='btn bl'>+ חוזה ניהול חדש</button></div>";
+  if(noInv>0) h+="<div style='background:#FFFBEB;border:1px solid #FDE68A;border-radius:10px;padding:10px 14px;margin-bottom:14px;font-size:13px;font-weight:600;color:#92400E'>⚠️ "+noInv+" חוזים ללא חשבונית</div>";
+  h+="<div class='card'><table class='T'><thead><tr><th>נכס</th><th>בעלים</th><th>סוג</th><th>סכום</th><th>תקופה</th><th>סטאטוס</th><th>תשלום אחרון</th><th>חשבונית</th><th></th></tr></thead><tbody>";
+  S.mgmt.forEach(function(m,i){
+    var stBg=m.status==="פעיל"?"#DCFCE7":m.status==="מושהה"?"#FEF9C3":"#F1F5F9";
+    var stFg=m.status==="פעיל"?"#166534":m.status==="מושהה"?"#854D0E":"#475569";
+    var amt=m.feeType==="הוראת קבע"?fmt(m.monthlyFee)+"/ח":fmt(m.annualFee);
+    var period=(m.periodStart||"")+( m.periodEnd?" → "+m.periodEnd:"");
+    h+="<tr style='background:"+(i%2===0?"#fff":"#FAFBFF")+"'>";
+    h+="<td><div style='font-weight:600;font-size:13px'>"+m.address+"</div></td>";
+    h+="<td><div style='font-size:13px'>"+m.owner+"</div><div style='font-size:10px;color:#94A3B8'>"+m.ownerPhone+"</div></td>";
+    h+="<td><span style='background:#EFF6FF;color:#1D6FA4;border-radius:5px;padding:2px 8px;font-size:11px;font-weight:600'>"+m.feeType+"</span></td>";
+    h+="<td style='font-weight:700;color:#1D6FA4'>"+amt+"</td>";
+    h+="<td style='font-size:11px;color:#64748B'>"+period+"</td>";
+    h+="<td><span style='background:"+stBg+";color:"+stFg+";border-radius:12px;padding:2px 9px;font-size:12px;font-weight:600'>"+m.status+"</span></td>";
+    h+="<td style='font-size:12px;color:"+(m.lastPaid?"#059669":"#94A3B8")+"'>"+(m.lastPaid||"טרם שולם")+"</td>";
+    h+="<td style='text-align:center'><button onclick='toggleMgmtInv("+m.id+")' style='background:none;border:none;cursor:pointer;font-size:18px'>"+(m.invoiceIssued?"✅":"⚠️")+"</button></td>";
+    h+="<td><div style='display:flex;gap:3px'>";
+    h+="<button class='sm' style='background:#D1FAE5;color:#065F46' onclick='markMgmtPaid("+m.id+")'>✓</button>";
+    h+="<button class='sm' style='background:#EFF6FF;color:#1D6FA4' onclick='editMgmt("+m.id+")'>✏️</button>";
+    h+="<button class='sm' style='background:#FEF2F2;color:#991B1B' onclick='dlMgmt("+m.id+")'>🗑</button>";
+    h+="</div></td></tr>";
+  });
+  if(S.mgmt.length===0) h+="<tr><td colspan='9' style='text-align:center;color:#94A3B8;padding:32px'>אין חוזי ניהול. לחץ הוסף</td></tr>";
+  h+="</tbody></table></div>";
+  return h;
+}
+
+
+var CONTRACT_TYPES=["שכירות","ניהול","תחזוקה","ביטוח","שונות"];
+var CONTRACT_YEARS=["2023-2024","2024-2025","2025-2026","2026-2027"];
+var _cYear="2024-2025";
+
+function setCYear(y){_cYear=y;render();}
+function delContract(id){if(!confirm("למחוק?"))return;S.contracts=S.contracts.filter(function(c){return c.id!==id;});saveAll();render();}
+function viewContract(id){
+  var c=S.contracts.find(function(x){return x.id===id;});if(!c||!c.fileData)return;
+  var w=window.open("","_blank");
+  if(c.fileData.indexOf("data:image")===0){
+    w.document.write("<html><body style='margin:0;background:#000;display:flex;justify-content:center;align-items:center;min-height:100vh'><img src='"+c.fileData+"' style='max-width:100%;max-height:100vh'><\/body><\/html>");
+  } else {
+    w.document.write("<html><body style='margin:0'><embed src='"+c.fileData+"' width='100%' height='100vh' type='application\/pdf'><\/body><\/html>");
+  }
+  w.document.close();
+}
+
+function addContractModal(){
+  var iS="font-size:13px;padding:7px 10px;border-radius:8px;border:1px solid #E2E8F0;width:100%;direction:rtl;outline:none";
+  var h="<div>";
+  h+="<div class='sc'><div class='sc-t'>פרטי חוזה</div>";
+  h+="<div style='display:flex;flex-wrap:wrap;gap:10px'>";
+  h+="<div class='fi'><label>נכס</label><select id='cf_pid' style='"+iS+"'><option value=''>-- בחר נכס --</option>";
+  S.props.forEach(function(p){h+="<option value='"+p.id+"'>"+p.address+(p.unit?" - "+p.unit:"")+"</option>";});
+  h+="</select></div>";
+  h+="<div class='fi'><label>סוג חוזה</label><select id='cf_type' style='"+iS+"'>";
+  CONTRACT_TYPES.forEach(function(t){h+="<option>"+t+"</option>";});
+  h+="</select></div>";
+  h+="<div class='fi'><label>שנה</label><select id='cf_year' style='"+iS+"'>";
+  CONTRACT_YEARS.forEach(function(y){h+="<option value='"+y+"'"+(y===_cYear?" selected":"")+">"+y+"</option>";});
+  h+="</select></div>";
+  h+="</div></div>";
+  h+="<div class='sc'><div class='sc-t'>קובץ ופרטים</div>";
+  h+="<div style='display:flex;flex-wrap:wrap;gap:10px;margin-bottom:10px'>";
+  h+="<div class='fi' style='max-width:150px'><label>סכום ₪</label><input id='cf_amt' type='number' style='"+iS+"' placeholder='0'></div>";
+  h+="<div class='fi'><label>הערות</label><input id='cf_notes' type='text' style='"+iS+"' placeholder='הערות חופשיות...'></div>";
+  h+="</div>";
+  h+="<div><label style='font-size:10px;color:#94A3B8;font-weight:700;text-transform:uppercase;display:block;margin-bottom:5px'>קובץ חוזה (PDF או תמונה)</label>";
+  h+="<input type='file' id='cf_file' accept='application/pdf,image/*' style='font-size:13px;padding:8px 10px;border:2px dashed #CBD5E1;border-radius:8px;background:#F8FAFC;width:100%;cursor:pointer'></div>";
+  h+="</div>";
+  h+="<div style='display:flex;gap:8px;margin-top:12px'><button class='btn gr' onclick='saveContract()' style='flex:2'>✓ שמור חוזה</button><button class='btn gy' onclick='closeM()' style='flex:1'>ביטול</button></div></div>";
+  openM("הוספת חוזה",h);
+}
+
+function saveContract(){
+  var pid=+gv('cf_pid')||null;
+  var prop=pid?getPropById(pid):null;
+  var file=document.getElementById('cf_file');
+  var base={propId:pid,address:prop?(prop.address+(prop.unit?' \u2013 '+prop.unit:'')):'',
+    type:gv('cf_type'),yearRange:gv('cf_year')||_cYear,
+    amount:+gv('cf_amt')||0,notes:gv('cf_notes'),
+    uploadDate:new Date().toLocaleDateString('he-IL'),filename:'',fileData:null};
+  if(file&&file.files&&file.files[0]){
+    var f=file.files[0];
+    // Check file size (max 2MB per file)
+    if(f.size>2*1024*1024){
+      alert('הקובץ גדול מדי (מקסימום 2MB). דחס את הקובץ ונסה שוב.');
+      return;
+    }
+    var fname=f.name;
+    var r=new FileReader();
+    r.onload=function(ev){
+      var entry=Object.assign({id:Date.now(),filename:fname,fileData:ev.target.result},base);
+      // For images - compress them
+      if(ev.target.result.indexOf('data:image')===0){
+        compressImage(ev.target.result,1200,0.8,function(compressed){
+          entry.fileData=compressed;
+          S.contracts.unshift(entry);
+          var ok=safeLocalSave('contracts',S.contracts);
+          if(!ok) alert('האחסון מלא. מחק חוזים ישנים כדי לפנות מקום.');
+          else saveAll();
+          closeM();render();
+        });
+      } else {
+        S.contracts.unshift(entry);
+        var ok=safeLocalSave('contracts',S.contracts);
+        if(!ok) alert('הקובץ גדול מדי לאחסון. נסה קובץ קטן יותר.');
+        else saveAll();
+        closeM();render();
+      }
+    };
+    r.readAsDataURL(f);
+  } else {
+    S.contracts.unshift(Object.assign({id:Date.now()},base));
+    saveAll();closeM();render();
+  }
+}
+
+function rContracts(){
+  var iS="font-size:12px;padding:5px 14px;border-radius:8px;border:none;cursor:pointer;font-family:Heebo,sans-serif;font-weight:600";
+  var h="<div style='display:flex;align-items:center;gap:8px;margin-bottom:16px;flex-wrap:wrap'>";
+  CONTRACT_YEARS.forEach(function(y){
+    var on=_cYear===y;
+    h+="<button onclick=\"setCYear('"+y+"')\" style='"+iS+";background:"+(on?"#1D6FA4":"#F1F5F9")+";color:"+(on?"#fff":"#475569")+"'>"+y+"</button>";
+  });
+  h+="<div style='flex:1'></div><button onclick='addContractModal()' class='btn bl'>+ הוסף חוזה</button></div>";
+
+  var shown=S.contracts.filter(function(c){return c.yearRange===_cYear;});
+
+  // Stats
+  h+="<div style='display:flex;gap:12px;margin-bottom:16px;flex-wrap:wrap'>";
+  h+="<div class='sb' style='border-top:3px solid #1D6FA4'><div style='font-size:10px;color:#94A3B8;font-weight:700;text-transform:uppercase;margin-bottom:4px'>סה\"כ "+_cYear+"</div><div style='font-size:22px;font-weight:800'>"+shown.length+"</div></div>";
+  CONTRACT_TYPES.forEach(function(t){
+    var cnt=shown.filter(function(c){return c.type===t;}).length;
+    if(cnt>0) h+="<div class='sb'><div style='font-size:10px;color:#94A3B8;font-weight:700;text-transform:uppercase;margin-bottom:4px'>"+t+"</div><div style='font-size:22px;font-weight:800'>"+cnt+"</div></div>";
+  });
+  h+="</div>";
+
+  if(shown.length===0){
+    h+="<div class='card' style='padding:32px;text-align:center;color:#94A3B8'>אין חוזים לשנת "+_cYear+"<br><br><button class='btn bl' onclick='addContractModal()'>+ הוסף חוזה ראשון</button></div>";
+    return h;
+  }
+
+  // Group by type
+  CONTRACT_TYPES.forEach(function(t){
+    var items=shown.filter(function(c){return c.type===t;});
+    if(!items.length)return;
+    h+="<div class='card' style='margin-bottom:12px;overflow:hidden'>";
+    h+="<div style='padding:10px 16px;background:#F8FAFC;border-bottom:1px solid #E2E8F0;font-weight:700;font-size:13px;color:#1D6FA4'>"+t+" ("+items.length+")</div>";
+    h+="<table class='T'><thead><tr><th>נכס</th><th>תאריך</th><th>סכום</th><th>הערות</th><th>קובץ</th><th></th></tr></thead><tbody>";
+    items.forEach(function(c,i){
+      h+="<tr style='background:"+(i%2===0?"#fff":"#FAFBFF")+"'>";
+      h+="<td style='font-weight:600'>"+c.address+"</td>";
+      h+="<td style='font-size:11px;color:#64748B'>"+c.uploadDate+"</td>";
+      h+="<td style='color:#1D6FA4;font-weight:600'>"+(c.amount>0?fmt(c.amount):"—")+"</td>";
+      h+="<td style='font-size:12px;color:#64748B'>"+(c.notes||"—")+"</td>";
+      h+="<td style='font-size:12px'>";
+      if(c.fileData){
+        h+="<button onclick='viewContract("+c.id+")' style='background:#EFF6FF;color:#1D6FA4;border:1px solid #BFDBFE;border-radius:6px;padding:3px 9px;cursor:pointer;font-size:11px;font-family:Heebo,sans-serif;font-weight:600'>👁 צפה</button> ";
+        h+="<a href='"+c.fileData+"' download='"+(c.filename||"חוזה.pdf")+"' style='background:#F0FDF4;color:#166534;border:1px solid #BBF7D0;border-radius:6px;padding:3px 9px;font-size:11px;font-family:Heebo,sans-serif;font-weight:600;text-decoration:none'>⬇ הורד</a>";
+      } else h+="<span style='color:#94A3B8;font-size:11px'>ללא קובץ</span>";
+      h+="</td>";
+      h+="<td><button class='sm' style='background:#FEF2F2;color:#991B1B' onclick='delContract("+c.id+")'>🗑</button></td></tr>";
+    });
+    h+="</tbody></table></div>";
+  });
+  return h;
+}
+
+
+function rExp(){
+  const selP=expPropId?S.props.find(p=>p.id===expPropId):null;
+  const shown=selP?S.expenses.filter(e=>e.propId===selP.id):S.expenses;
+  return`<div style="display:flex;gap:0;min-height:520px">
+    <div style="width:230px;flex-shrink:0;background:#fff;border-radius:14px 0 0 14px;border:1px solid #E2E8F0;overflow-y:auto;display:flex;flex-direction:column">
+      <div style="padding:12px 14px;border-bottom:1px solid #F1F5F9;font-size:11px;font-weight:700;color:#94A3B8;text-transform:uppercase">תיקיות נכסים</div>
+      <div style="padding:6px">
+        <button onclick="expPropId=null;render()" style="width:100%;text-align:right;padding:8px 10px;border-radius:8px;border:none;cursor:pointer;font-size:13px;font-family:Heebo,sans-serif;font-weight:600;background:${!expPropId?"#1D6FA4":"transparent"};color:${!expPropId?"#fff":"#475569"}">📁 כל ההוצאות <span style="float:left;font-weight:400;font-size:11px;opacity:.7">${S.expenses.length}</span></button>
+        ${S.props.map(p=>{const cnt=S.expenses.filter(e=>e.propId===p.id).length;const tot=S.expenses.filter(e=>e.propId===p.id).reduce((s,e)=>s+Number(e.amount),0);const sel=expPropId===p.id;return`<button onclick="expPropId=${p.id};render()" style="width:100%;text-align:right;padding:7px 10px;border-radius:8px;border:none;cursor:pointer;font-size:12px;font-family:Heebo,sans-serif;margin-top:2px;background:${sel?"#EFF6FF":"transparent"};color:${sel?"#1D6FA4":"#475569"};border-right:3px solid ${sel?"#1D6FA4":"transparent"}"><div style="font-weight:${sel?700:500}">${p.address}</div><div style="font-size:10px;color:#94A3B8;margin-top:1px">${cnt} הוצאות${tot>0?" · ₪"+tot.toLocaleString():""}</div></button>`;}).join("")}
+      </div>
+    </div>
+    <div style="flex:1;border:1px solid #E2E8F0;border-right:none;border-radius:0 14px 14px 0;background:#fff;display:flex;flex-direction:column">
+      <div style="padding:12px 18px;border-bottom:1px solid #F1F5F9;display:flex;align-items:center;justify-content:space-between;flex-shrink:0">
+        <div><div style="font-size:14px;font-weight:700">${selP?selP.address:"כל ההוצאות"}</div>${selP?`<div style="font-size:11px;color:#94A3B8">${selP.status} · ${selP.tenant!=="-"?selP.tenant:"ללא שוכר"}</div>`:""}</div>
+        <div style="display:flex;gap:8px">
+          ${selP?`<button class="sm" style="background:#EFF6FF;color:#1D6FA4" onclick="printQReport(${selP.id})">🖨 דוח רבעוני</button>`:""}
+          <button class="btn blue" style="font-size:12px;padding:5px 12px" onclick='openM("הוצאה חדשה",expForm(null,${expPropId||"null"}))'>+ הוצאה</button>
+        </div>
+      </div>
+      <div style="display:flex;gap:10px;padding:10px 16px;border-bottom:1px solid #F1F5F9;flex-shrink:0">
+        <div style="background:#FEF2F2;border-radius:8px;padding:8px 14px;flex:1;text-align:center"><div style="font-size:9px;color:#94A3B8;font-weight:700;text-transform:uppercase">סה"כ הוצאות</div><div style="font-size:18px;font-weight:800;color:#EF4444">${fmt(shown.reduce((s,e)=>s+Number(e.amount),0))}</div></div>
+        <div style="background:#FEF3C7;border-radius:8px;padding:8px 14px;flex:1;text-align:center"><div style="font-size:9px;color:#94A3B8;font-weight:700;text-transform:uppercase">ממתין לחשבונית</div><div style="font-size:18px;font-weight:800;color:#D97706">${shown.filter(e=>!e.invoiceReceived).length}</div></div>
+        <div style="background:#F0FDF4;border-radius:8px;padding:8px 14px;flex:1;text-align:center"><div style="font-size:9px;color:#94A3B8;font-weight:700;text-transform:uppercase">מספר הוצאות</div><div style="font-size:18px;font-weight:800;color:#059669">${shown.length}</div></div>
+      </div>
+      <div style="overflow-y:auto;flex:1">
+        ${shown.length===0?`<div style="text-align:center;color:#94A3B8;padding:40px;font-size:14px">אין הוצאות${selP?" לנכס זה":""}<br><button class="btn blue" style="margin-top:12px" onclick='openM("הוצאה חדשה",expForm(null,${expPropId||"null"}))'>+ הוסף הוצאה</button></div>`:""}
+        ${shown.map((e,i)=>{const pc=e.paymentMethod==="ביט"?"#8B5CF6":e.paymentMethod==="העברה בנקאית"?"#1D6FA4":e.paymentMethod==="מזומן"?"#059669":"#94A3B8";
+          return`<div style="padding:12px 18px;border-bottom:1px solid #F1F5F9;display:flex;align-items:flex-start;gap:12px;background:${i%2===0?"#fff":"#FAFBFF"}">
+            <div style="flex:1">
+              <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px"><div style="font-size:13px;font-weight:600">${e.vendor}</div><span style="background:#F1F5F9;color:#475569;border-radius:5px;padding:1px 7px;font-size:11px">${e.type}</span>${!selP?`<span style="background:#EFF6FF;color:#1D6FA4;border-radius:5px;padding:1px 7px;font-size:11px">${e.address||""}</span>`:""}</div>
+              <div style="font-size:12px;color:#64748B;margin-bottom:4px">${e.desc||""}</div>
+              <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+                <span style="font-size:11px;color:#94A3B8">📅 ${e.date}</span>
+                <span style="font-size:11px;color:${pc};font-weight:600">💳 ${e.paymentMethod||"לא צוין"}</span>
+                ${e.invoiceReceived?`<span style="font-size:11px;color:#059669;font-weight:600">✓ חשבונית</span>`:`<span style="font-size:11px;color:#D97706">⚠ חשבונית חסרה</span>`}
+                ${e.invoiceData?`<button onclick="viewInv(${e.id})" style="font-size:11px;color:#1D6FA4;background:none;border:none;cursor:pointer;text-decoration:underline">📎 צפה</button>`:""}
+              </div>
+            </div>
+            <div style="text-align:left;flex-shrink:0">
+              <div style="font-size:16px;font-weight:800;color:#EF4444">${fmt(e.amount)}</div>
+              <div style="display:flex;gap:4px;margin-top:6px">
+                <button class="sm" style="background:#EFF6FF;color:#1D6FA4" onclick='openM("עריכת הוצאה",expForm(S.expenses.find(x=>x.id===${e.id}),${expPropId||"null"}))'>✏️</button>
+                <button class="sm" style="background:#FEF2F2;color:#991B1B" onclick="dlExp(${e.id})">🗑</button>
+              </div>
+            </div>
+          </div>`;}).join("")}
+      </div>
+    </div>
+  </div>`;
+}
+function viewInv(id){const e=S.expenses.find(x=>x.id===id);if(!e||!e.invoiceData)return;const w=window.open("","_blank");if(e.invoiceData.startsWith("data:image")){w.document.write(`<html><body style="margin:0;background:#000;display:flex;justify-content:center;align-items:center;min-height:100vh"><img src="${e.invoiceData}" style="max-width:100%;max-height:100vh"></body></html>`);}else{w.document.write(`<html><body style="margin:0"><embed src="${e.invoiceData}" width="100%" height="100vh"></body></html>`);}w.document.close();}
+
+render();
+</script>
+</body>
+</html>
